@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zeei.gems.dao.RealTimeAlarmDao">
+
+	<select id="realTimeAlarmList" parameterType="Map" resultType="com.zeei.gems.vo.AlarmVO" >
+		SELECT a.POINTCODE,a.ALARMCODE,a.ISSHIELDING,a.POLLUTECODE,c.ALMTYPENAME,s.POINTNAME,c.DESCRIPTION,a.POLLUTECODE,s.POLLUTENAME,FORMAT(a.ALARMVALUE,s.NUMPRECISION) ALARMVALUE,SUBSTR(a.STARTTIME,1,19) STARTTIME, c.ALARTYPELEVEL ,e.CATEGORYNAME AS alarTypeLevelName
+		FROM T_BAS_ALMINFO a 
+		LEFT JOIN T_BAS_ALM_DEF b ON a.ALARMCODE = b.ALARMCODE
+		INNER JOIN V_ENV_STATIONPOLLINFO s ON s.POINTCODE=a.POINTCODE AND s.POLLUTECODE=a.POLLUTECODE
+		LEFT JOIN T_BAS_ALM_TYPE c ON b.ALMTYPEID = c.ALMTYPEID
+		LEFT JOIN T_DIC_GENERALCATEGORY e ON e.GENERALCODE = c.ALARTYPELEVEL
+		WHERE a.ALARMSTATUS in (1,2,3)
+		<if test="vo.startTime != null and vo.startTime !=''">
+			AND a.STARTTIME &gt;= #{vo.startTime} 
+		</if>
+		<if test="vo.endTime != null and vo.endTime !=''">
+			and a.STARTTIME &lt;= #{vo.endTime}
+		</if>
+		<if test="list != null">
+			AND a.POINTCODE IN
+			<foreach item="pointCode" index="index" collection="list" open="(" separator="," close=")">
+				#{pointCode}
+			</foreach>
+		</if>
+		<if test="vo.almTypeId != null and vo.almTypeId !='' ">
+			AND c.ALMTYPEID = #{vo.almTypeId}
+		</if>
+		<if test="vo.alarTypeLevel != null and vo.alarTypeLevel !='' ">
+			AND c.ALARTYPELEVEL  = #{vo.alarTypeLevel}
+		</if>
+		ORDER BY a.POINTCODE,b.ALMTYPEID,a.STARTTIME
+
+	</select>
+
+	<select id="realTimeAlarmCount" parameterType="Map" resultType="com.zeei.gems.vo.AlarmVO">
+		SELECT a.STARTTIME
+		FROM T_BAS_ALMINFO a 
+		LEFT JOIN T_BAS_ALM_DEF b ON a.ALARMCODE = b.ALARMCODE
+		LEFT JOIN V_BAS_POINTSITE_INFO d ON d.POINTCODE = a.POINTCODE
+		LEFT JOIN T_BAS_ALM_TYPE c ON b.ALMTYPEID = c.ALMTYPEID
+		LEFT JOIN T_DIC_GENERALCATEGORY e ON e.GENERALCODE = c.ALARTYPELEVEL
+		WHERE a.ALARMSTATUS in (1,2,3)
+		<if test="list != null">
+			AND a.POINTCODE IN
+			<foreach item="pointCode" index="index" collection="list" open="(" separator="," close=")">
+				#{pointCode}
+			</foreach>
+		</if>
+		<if test="vo.almTypeId != null and vo.almTypeId !='' ">
+			AND c.ALMTYPEID = #{vo.almTypeId}
+		</if>
+		<if test="vo.alarTypeLevel != null and vo.alarTypeLevel !='' ">
+			AND c.ALARTYPELEVEL  = #{vo.alarTypeLevel}
+		</if>
+		ORDER BY a.POINTCODE,b.ALMTYPEID,a.STARTTIME
+
+	</select>
+
+	<update id="updateShielding" parameterType="com.zeei.gems.vo.AlarmVO">
+		UPDATE T_BAS_ALMINFO 
+		SET  ISSHIELDING = #{isShielding}
+		WHERE POINTCODE = #{pointCode}
+		AND ALARMCODE = #{alarmCode}
+		AND POLLUTECODE = #{polluteCode}
+		AND STARTTIME = #{startTime}
+	</update>
+
+</mapper>

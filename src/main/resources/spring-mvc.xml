@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	 http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+	http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context-4.2.xsd
+	http://www.springframework.org/schema/mvc
+	http://www.springframework.org/schema/mvc/spring-mvc-4.2.xsd
+	http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop.xsd
+	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.1.xsd">
+	<!--配置 -->
+	<context:component-scan base-package="com.zeei">
+		<context:include-filter type="annotation"
+			expression="org.springframework.stereotype.Controller" />
+	</context:component-scan>
+	
+	<bean class="com.zeei.ktp.config.Swagger2Config"/>
+
+	<!-- 启用基于AspectJ切面的注释 -->
+	<aop:aspectj-autoproxy />
+	
+	 <context:annotation-config/>
+	<mvc:annotation-driven>
+		<mvc:message-converters
+			register-defaults="true">
+			<!-- 配置Fastjson支持 -->
+			<bean
+				class="com.zeei.common.json.MappingFastJsonHttpMessageConverter">
+				<property name="supportedMediaTypes">
+					<list>
+						<value>text/html;charset=UTF-8</value>
+						<value>application/json</value>
+					</list>
+				</property>
+				<property name="serializerFeature">
+					<list>
+						<value>WriteMapNullValue</value>
+						<value>QuoteFieldNames</value>
+						<value>WriteNullListAsEmpty</value>
+						<value>WriteNullStringAsEmpty</value>
+						<value>WriteNullBooleanAsFalse</value>
+						<value>WriteDateUseDateFormat</value>
+					</list>
+				</property>
+			</bean>
+		</mvc:message-converters>
+	</mvc:annotation-driven>
+
+	<!-- 必须要加，不加静态资源无法处理 -->
+	<mvc:default-servlet-handler />
+
+	<!-- 配置处理器映射器 -->
+	<bean
+		class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping" />
+	<!-- 配置全局异常处理器 -->
+	<bean id="exceptionHandler"
+		class="com.zeei.common.utils.ExceptionUtil" />
+	<!--配置转换器 -->
+	<bean id="conversionService"
+		class="org.springframework.context.support.ConversionServiceFactoryBean">
+		<property name="converters">
+			<util:set>
+				<bean class="com.zeei.common.converter.StringToDateConverter" />
+			</util:set>
+		</property>
+	</bean>
+	<!-- <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"> 
+		<property name="defaultEncoding" value="utf-8"></property> <property name="maxUploadSize" 
+		value="10485760000"></property> <property name="maxInMemorySize" value="40960"></property> 
+		</bean> <bean id="handlerExceptionResolver" class="com.zeei.common.exception.DefaultHandlerExceptionResolver"> 
+		<property name="entries"> <util:list> <bean class="com.zeei.common.exception.ExceptionMappingEntry" 
+		p:exceptionClass="java.lang.Exception" p:statusCode="500" p:message="Internal 
+		Error" /> </util:list> </property> </bean> <bean class="com.zeei.common.json.spring.CustomizedHandlerAdapter"> 
+		<property name="modelAndViewResolvers"> <util:list> <bean class="com.zeei.common.json.spring.JsonModelAndViewResolver" 
+		/> </util:list> </property> <property name="webBindingInitializer"> <bean 
+		class="org.springframework.web.bind.support.ConfigurableWebBindingInitializer"> 
+		<property name="conversionService" ref="conversionService" /> </bean> </property> 
+		</bean> -->
+	<!--配置资源解析器 -->
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="defaultEncoding" value="utf-8"></property>
+		<property name="maxUploadSize" value="10485760000"></property>
+		<property name="maxInMemorySize" value="40960"></property>
+	</bean>
+
+	<!-- 开服务器自动启动项 -->
+	<!-- <bean class="com.zeei.swm.controller.WebContextListener"></bean> -->
+
+</beans>

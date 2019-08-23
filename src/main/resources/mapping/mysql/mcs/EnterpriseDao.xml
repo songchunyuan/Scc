@@ -1,0 +1,423 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zeei.mcs.dao.EnterpriseDao">
+
+	<select id="queryEnterList" parameterType="com.zeei.mcs.vo.EnterList" resultType="com.zeei.mcs.vo.EnterList">
+		SELECT 
+		 e.pscode,
+		 e.yearmn,
+		 e.stdpscode,
+		 e.psname,
+		 e.entername,
+		 e.hisname,
+		 e.corpcode,
+		 e.corpname,
+		 e.organizationcode,
+		 e.enteraddress,
+		 e.code_region_sheng AS codeRegionSheng,
+		 e.code_region_shi  AS codeRegionShi,
+		 e.code_region_xian AS codeRegionXian,
+		 e.code_street AS codeStreet, 
+		 e.linkman,
+		 e.tel,
+		 e.phone,
+		 e.fax,
+		 e.email,
+		 e.postalcode,
+		 e.longitude,
+		 e.latitude,
+		 e.website,
+		 e.areaid,
+		 e.code_trade AS codeTrade,
+		 e.code_wsystem AS codeWsystem,
+		 e.groupcompanycode,
+		 e.code_industrialpark AS codeIndustrialpark,
+		 e.code_entersize AS codeEntersize,
+		 e.code_registertype AS codeRegistertype,
+		 e.code_entertype AS codeEntertype,
+		 e.code_controllevel AS codeControlLevel,
+		 e.entertype_code AS entertypeCode,
+		 e.wateroutcount,
+		 e.gasoutcount,
+		 e.code_qualification AS codeQualification,
+		 e.createtime,
+		 e.stoptime,
+		 e.lateupdatetime,
+		 e.validtime,
+		 e.invalidtime,
+		 e.enablestatus,
+		 e.envrionlinkmen,
+		 e.environtel,
+		 e.environfax,
+		 e.environphone,
+		 e.bankname,
+		 e.bankcode,
+		 e.enablestate,
+		 e.mainproduct,
+		 e.productionstate,
+		 e.declarecode,
+		 e.outpermitcode,
+		 e.onlinechkflag,
+		 e.changeordersid,
+		 e.datasource_code AS datasourceCode,
+		 e.remark,
+		 e.updatetime,
+		 e.mointordeptid,
+		 e.estatus,
+		 e.ipgp,
+		 e.ordernum,
+		 e.piccodelist,
+		 e.enterFirstLetter
+		FROM
+		  T_PS_BAS_ENTERLIST e
+		WHERE e.yearmn=YEAR(NOW())
+		AND e.estatus=1  
+		<if test="pscode !=null ">AND e.pscode =#{pscode}</if>
+		<if test="enterName !=null and enterName !=''">AND e.entername =#{enterName}</if>
+		ORDER BY e.ordernum DESC,e.pscode DESC
+	</select>
+	
+	<select id="queryEnterpriseByCondition" parameterType="java.util.Map" resultType="com.zeei.mcs.vo.EnterpriseResult">		
+		SELECT 
+		  e.pscode,
+		  e.entername,
+		  e.organizationcode,
+		  e.areaid,
+		  ar.regionname AS areaName,
+		  e.code_trade AS codeTrade,
+		  tr.tradename,
+		  e.code_controllevel AS codeControllevel,
+		  ge.categoryname AS controlLevelName,
+		  e.onlinechkflag,
+		  e.ordernum,
+		  e.enteraddress,
+		  e.longitude,
+		  e.latitude,
+		  e.enterFirstLetter
+		FROM
+		  T_PS_BAS_ENTERLIST e 
+		  LEFT JOIN T_DIC_AREACODE ar 
+		    ON ar.code_region = e.areaid 
+		  LEFT JOIN T_DIC_TRADECODE tr 
+		    ON tr.code_trade = e.code_trade 
+		  LEFT JOIN T_DIC_GENERALCATEGORY ge 
+		    ON ge.generalcode = e.code_controllevel 
+		 WHERE e.estatus=1  
+		 AND e.pscode!=-1
+		  AND e.yearmn=YEAR(NOW())
+		<if test="enterpriseName !=null and enterpriseName !=''">AND e.entername LIKE CONCAT('%',#{enterpriseName},'%')</if>
+		<if test="organizationCode !=null and organizationCode !=''">AND e.organizationcode LIKE CONCAT('%',#{organizationCode},'%')</if>
+		<if test="codeControlLevel !=null and codeControlLevel !=''">AND e.code_controllevel=#{codeControlLevel}</if>
+		<if test="onlineChkFlag !=null and onlineChkFlag==1">AND e.onlinechkflag=#{onlineChkFlag}</if>
+		<if test="onlineChkFlag !=null and onlineChkFlag==0">AND (e.onlinechkflag=#{onlineChkFlag} OR e.onlinechkflag IS NULL)</if>
+	  	<if test="areaCodeList !=null and areaCodeList.size()>0">
+	  		AND e.areaid IN
+	  		<foreach collection="areaCodeList" open="(" separator="," index="index" item="areaCode" close=")">
+	  			#{areaCode}
+	  		</foreach>
+	  	</if>
+	  	<if test="tradeCodeList !=null and tradeCodeList.size()>0">
+	  		AND e.code_trade IN
+	  		<foreach collection="tradeCodeList" open="(" separator="," index="index" item="tradeCode" close=")">
+	  			#{tradeCode}
+	  		</foreach>
+	  	</if>
+		ORDER BY e.ordernum DESC,e.pscode DESC
+	</select>
+	
+	
+	<select id="queryEnterListByCondition" parameterType="java.util.Map" resultType="com.zeei.mcs.vo.EnterList">
+		SELECT 
+		 e.pscode,
+		 e.yearmn,
+		 e.stdpscode,
+		 e.psname,
+		 e.entername,
+		 e.hisname,
+		 e.corpcode,
+		 e.corpname,
+		 e.organizationcode,
+		 e.enteraddress,
+		 e.code_region_sheng AS codeRegionSheng,
+		 e.code_region_shi  AS codeRegionShi,
+		 e.code_region_xian AS codeRegionXian,
+		 e.code_street AS codeStreet, 
+		 e.linkman,
+		 e.tel,
+		 e.phone,
+		 e.fax,
+		 e.email,
+		 e.postalcode,
+		 e.longitude,
+		 e.latitude,
+		 e.website,
+		 e.areaid,
+		 e.code_trade AS codeTrade,
+		 e.code_wsystem AS codeWsystem,
+		 e.groupcompanycode,
+		 e.code_industrialpark AS codeIndustrialpark,
+		 e.code_entersize AS codeEntersize,
+		 e.code_registertype AS codeRegistertype,
+		 e.code_entertype AS codeEntertype,
+		 e.code_controllevel AS codeControlLevel,
+		 e.entertype_code AS entertypeCode,
+		 e.wateroutcount,
+		 e.gasoutcount,
+		 e.code_qualification AS codeQualification,
+		 e.createtime,
+		 e.stoptime,
+		 e.lateupdatetime,
+		 e.validtime,
+		 e.invalidtime,
+		 e.enablestatus,
+		 e.envrionlinkmen,
+		 e.environtel,
+		 e.environfax,
+		 e.environphone,
+		 e.bankname,
+		 e.bankcode,
+		 e.enablestate,
+		 e.mainproduct,
+		 e.productionstate,
+		 e.declarecode,
+		 e.outpermitcode,
+		 e.onlinechkflag,
+		 e.changeordersid,
+		 e.datasource_code AS datasourceCode,
+		 e.remark,
+		 e.updatetime,
+		 e.mointordeptid,
+		 e.estatus,
+		 e.ipgp,
+		 e.ordernum,
+		 e.piccodelist,
+		 e.enterFirstLetter,
+		(SELECT isdangersource FROM T_PS_BAS_ENTERMANAGE em WHERE em.pscode=e.pscode AND em.yearmn=YEAR(NOW())) AS isDangerSource,
+		 ar.regionname AS areaName,
+		 ge.categoryname AS controlLevelName,
+		  tr.tradename,
+		d.deptname AS mointorDeptName,
+		w.wsystemwatername AS wsystemName
+		FROM
+		  T_PS_BAS_ENTERLIST e
+		  LEFT JOIN T_DIC_AREACODE ar 
+		    ON ar.code_region = e.areaid 
+		  LEFT JOIN T_DIC_TRADECODE tr 
+		    ON tr.code_trade = e.code_trade 
+		  LEFT JOIN T_DIC_GENERALCATEGORY ge 
+		    ON ge.generalcode = e.code_controllevel  
+		  LEFT JOIN T_BAS_DEPTINFO d
+		  	ON d.deptid=e.mointordeptid
+		  LEFT JOIN T_DIC_WSYSTEMRIVER w
+		  	ON w.code_wsystemwater=e.code_wsystem 	
+		WHERE e.yearmn=YEAR(NOW())
+		AND e.estatus=1  
+		<if test="pscode !=null ">AND e.pscode =#{pscode}</if>
+		ORDER BY e.ordernum DESC,e.pscode DESC
+	</select>
+	
+	<insert id="insertEnterprise" parameterType="com.zeei.mcs.vo.EnterList"  useGeneratedKeys="true" keyProperty="pscode" >
+		INSERT INTO T_PS_BAS_ENTERLIST(CREATETIME,YEARMN
+		<trim>  
+		 	 <if test="enterName !=null and enterName != ''">
+				,ENTERNAME
+			</if>	
+		 	 <if test="areaid !=null and areaid != ''">
+				,AREAID
+			</if>	
+		 	 <if test="codeTrade !=null and codeTrade != ''">
+				,CODE_TRADE
+			</if>	
+		 	 <if test="codeWSystem !=null and codeWSystem != ''">
+				,CODE_WSYSTEM
+			</if>	
+		 	 <if test="longitude !=null">
+				,LONGITUDE
+			</if>	
+		 	 <if test="latitude !=null">
+				,LATITUDE
+			</if>	
+		 	 <if test="enterAddress !=null and enterAddress != ''">
+				,ENTERADDRESS
+			</if>	
+		 	 <if test="linkman !=null and linkman != ''">
+				,LINKMAN
+			</if>	
+		 	 <if test="tel !=null and tel != ''">
+				,TEL
+			</if>	
+		 	 <if test="corpName !=null and corpName != ''">
+				,CORPNAME
+			</if>	
+		 	 <if test="organizationCode !=null and organizationCode != ''">
+				,ORGANIZATIONCODE
+			</if>	
+		 	 <if test="outPermitCode !=null and outPermitCode != ''">
+				,OUTPERMITCODE
+			</if>	
+		 	 <if test="codeControlLevel !=null and codeControlLevel != ''">
+				,CODE_CONTROLLEVEL
+			</if>	
+		 	 <if test="onlineChkFlag !=null">
+				,ONLINECHKFLAG
+			</if>	
+		 	 <if test="remark !=null and remark != ''">
+				,REMARK
+			</if>	
+		 	 <if test="waterOutCount !=null">
+				,WATEROUTCOUNT
+			</if>	
+		 	 <if test="gasOutcount !=null">
+				,GASOUTCOUNT
+			</if>	
+		 	 <if test="declareCode !=null and declareCode !=''">
+				,DECLARECODE
+			</if>	
+			<if test="email !=null and email !=''">
+				,EMAIL
+			</if>	
+			<if test="envrionLinkmen !=null and envrionLinkmen !=''">
+				,ENVRIONLINKMEN
+			</if>	
+			<if test="mointorDeptId !=null">
+				,MOINTORDEPTID
+			</if>	
+			<if test="orderNum !=null">
+				,ORDERNUM
+			</if>	
+			<if test="enterFirstLetter !=null and enterFirstLetter !=''">
+				,ENTERFIRSTLETTER
+			</if>	
+			<if test="ipgp !=null and ipgp !=''">
+				,IPGP
+			</if>	
+			<if test="picCodeList !=null and picCodeList !=''">
+				,PICCODELIST
+			</if>	
+		</trim>	
+		)
+		values(NOW(),YEAR(NOW())
+		<trim>  
+		 	 <if test="enterName !=null and enterName != ''">
+				,#{enterName}
+			</if>	
+		 	 <if test="areaid !=null and areaid != ''">
+				,#{areaid}
+			</if>	
+		 	 <if test="codeTrade !=null and codeTrade != ''">
+				,#{codeTrade}
+			</if>	
+		 	 <if test="codeWSystem !=null and codeWSystem != ''">
+				,#{codeWSystem}
+			</if>	
+		 	 <if test="longitude !=null">
+				,#{longitude}
+			</if>	
+		 	 <if test="latitude !=null">
+				,#{latitude}
+			</if>	
+		 	 <if test="enterAddress !=null and enterAddress != ''">
+				,#{enterAddress}
+			</if>	
+		 	 <if test="linkman !=null and linkman != ''">
+				,#{linkman}
+			</if>	
+		 	 <if test="tel !=null and tel != ''">
+				,#{tel}
+			</if>	
+		 	 <if test="corpName !=null and corpName != ''">
+				,#{corpName}
+			</if>	
+		 	 <if test="organizationCode !=null and organizationCode != ''">
+				,#{organizationCode}
+			</if>	
+		 	 <if test="outPermitCode !=null and outPermitCode != ''">
+				,#{outPermitCode}
+			</if>	
+		 	 <if test="codeControlLevel !=null and codeControlLevel != ''">
+				,#{codeControlLevel}
+			</if>	
+		 	 <if test="onlineChkFlag !=null">
+				,#{onlineChkFlag}
+			</if>	
+		 	 <if test="remark !=null and remark != ''">
+				,#{remark}
+			</if>	
+			<if test="waterOutCount !=null">
+				,#{waterOutCount}
+			</if>	
+			<if test="gasOutcount !=null">
+				,#{gasOutcount}
+			</if>	
+			<if test="declareCode !=null and declareCode !=''">
+				,#{declareCode}
+			</if>	
+			<if test="email !=null and email !=''">
+				,#{email}
+			</if>	
+			<if test="envrionLinkmen !=null and envrionLinkmen !=''">
+				,#{envrionLinkmen}
+			</if>
+			<if test="mointorDeptId !=null">
+				,#{mointorDeptId}
+			</if>	
+			<if test="orderNum !=null">
+				,#{orderNum}
+			</if>
+			<if test="enterFirstLetter !=null and enterFirstLetter !=''">
+				,#{enterFirstLetter}
+			</if>	
+			<if test="ipgp !=null and ipgp !=''">
+				,#{ipgp}
+			</if>
+			<if test="picCodeList !=null and picCodeList !=''">
+				,#{picCodeList}
+			</if>		
+		</trim>	
+		)
+	</insert>
+	
+	<update id="updateEnterpriseById" parameterType="com.zeei.mcs.vo.EnterList">
+	    UPDATE T_PS_BAS_ENTERLIST
+	      SET  
+	      	entername    = #{enterName,jdbcType    = VARCHAR},
+	      	ipgp    = #{ipgp,jdbcType    = VARCHAR},
+	      	organizationcode    = #{organizationCode,jdbcType    = VARCHAR},
+	      	areaid    = #{areaid,jdbcType    = VARCHAR},
+	        code_trade     = #{codeTrade, jdbcType    = VARCHAR},
+	        code_wsystem     = #{codeWSystem, jdbcType    = VARCHAR},
+	        code_controllevel     = #{codeControlLevel, jdbcType    = VARCHAR},
+	        mointordeptid     = #{mointorDeptId, jdbcType    = INTEGER},
+	        corpname     = #{corpName, jdbcType    = VARCHAR},
+	        envrionlinkmen     = #{envrionLinkmen, jdbcType    = VARCHAR},
+	        tel     = #{tel, jdbcType    = VARCHAR},
+	        email     = #{email, jdbcType    = VARCHAR},
+	        enteraddress     = #{enterAddress, jdbcType    = VARCHAR},
+	        longitude     = #{longitude, jdbcType    = DOUBLE},
+	        latitude     = #{latitude, jdbcType    = DOUBLE},
+	        wateroutcount     = #{waterOutCount, jdbcType    = INTEGER},
+	        gasoutcount     = #{gasOutcount, jdbcType    = INTEGER},
+	        declarecode     = #{declareCode, jdbcType    = VARCHAR},
+	        outpermitcode     = #{outPermitCode, jdbcType    = VARCHAR},
+	        onlinechkflag     = #{onlineChkFlag, jdbcType    = INTEGER},
+	        ordernum     = #{orderNum, jdbcType    = INTEGER},
+	        remark     = #{remark, jdbcType    = VARCHAR},
+	        piccodelist     = #{picCodeList, jdbcType    = VARCHAR},
+	        enterFirstLetter=#{enterFirstLetter,jdbcType    = VARCHAR}
+	     WHERE pscode = #{pscode} AND yearmn=YEAR(NOW())
+	</update>
+	
+	<update id="deleteEnterpriseByIds">
+		UPDATE T_PS_BAS_ENTERLIST
+		SET 
+			estatus=0,
+			entername=CONCAT(IFNULL(entername,''),'+',NOW(),'+','已删除')
+		WHERE PSCODE IN
+		<foreach collection="list" separator="," item="id" open="(" close=")">
+			#{id} 
+		</foreach>
+	</update>  
+	
+</mapper>

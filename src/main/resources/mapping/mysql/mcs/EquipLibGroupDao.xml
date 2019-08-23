@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zeei.mcs.dao.EquipLibGroupDao" >
+  <resultMap id="BaseResultMap" type="com.zeei.mcs.vo.EquipLibGroupVO" >
+    <id column="GENERALCODE" property="generalCode" jdbcType="VARCHAR" />
+    <result column="CATEGORYNAME" property="categoryName" jdbcType="VARCHAR" />
+    <result column="CATEGORYCLASS" property="categoryClass" jdbcType="VARCHAR" />
+    <result column="ORDERNUM" property="orderNum" jdbcType="INTEGER" />
+    <result column="CSTATUS" property="cstatus" jdbcType="INTEGER" />
+    <result column="REMARK" property="remark" jdbcType="VARCHAR" />
+  </resultMap>
+  
+  <select id="selectByPrimaryKey" parameterType="java.util.Map" resultType="com.zeei.mcs.vo.EquipLibGroupVO">
+    SELECT 
+    GENERALCODE,
+    CATEGORYNAME,
+	CATEGORYCLASS,
+	ORDERNUM,
+	CSTATUS,
+	REMARK
+    FROM T_DIC_GENERALCATEGORY
+    <where>
+		    <if test="categoryClass != null and categoryClass != ''">categoryClass = #{categoryClass,jdbcType=VARCHAR}</if>
+		    <if test="categoryName != null and categoryName != ''">AND categoryName LIKE CONCAT('%',#{categoryName},'%')</if>
+	</where>
+  </select>
+  
+    <select id="selectByPrimary" parameterType="java.util.Map" resultType="com.zeei.mcs.vo.EquipLibGroupVO">
+    SELECT 
+    GENERALCODE,
+    CATEGORYNAME,
+	CATEGORYCLASS,
+	ORDERNUM,
+	CSTATUS,
+	REMARK
+    FROM T_DIC_GENERALCATEGORY
+    <where>
+		    <if test="generalCode != null and generalCode != ''">generalCode = #{generalCode,jdbcType=VARCHAR}</if>
+	</where>
+  </select>
+  
+  <delete id="deleteByPrimaryKey">
+    DELETE FROM T_DIC_GENERALCATEGORY
+    WHERE GENERALCODE IN
+     <foreach collection="list" separator="," item="generalCode" open="(" close=")">
+		#{generalCode} 
+	</foreach>
+  </delete>
+
+  <insert id="insertSelective" parameterType="com.zeei.mcs.vo.EquipLibGroupVO" >
+    INSERT INTO T_DIC_GENERALCATEGORY
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="generalCode != null" >
+        GENERALCODE,
+      </if>
+      <if test="categoryName != null" >
+        CATEGORYNAME,
+      </if>
+      <if test="categoryClass != null" >
+        CATEGORYCLASS,
+      </if>
+      <if test="orderNum != null" >
+        ORDERNUM,
+      </if>
+      <if test="cstatus != null" >
+        CSTATUS,
+      </if>
+      <if test="remark != null" >
+        REMARK,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="generalCode != null" >
+        #{generalCode,jdbcType=VARCHAR},
+      </if>
+      <if test="categoryName != null" >
+        #{categoryName,jdbcType=VARCHAR},
+      </if>
+      <if test="categoryClass != null" >
+        #{categoryClass,jdbcType=VARCHAR},
+      </if>
+      <if test="orderNum != null" >
+        #{orderNum,jdbcType=INTEGER},
+      </if>
+      <if test="cstatus != null" >
+        #{cstatus,jdbcType=INTEGER},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  
+  <update id="updateByPrimaryKeySelective" parameterType="com.zeei.mcs.vo.EquipLibGroupVO" >
+    update T_DIC_GENERALCATEGORY
+    <set >
+      <if test="categoryName != null" >
+        CATEGORYNAME = #{categoryName,jdbcType=VARCHAR},
+      </if>
+      <if test="categoryClass != null" >
+        CATEGORYCLASS = #{categoryClass,jdbcType=VARCHAR},
+      </if>
+      <if test="orderNum != null" >
+        ORDERNUM = #{orderNum,jdbcType=INTEGER},
+      </if>
+      <if test="cstatus != null" >
+        CSTATUS = #{cstatus,jdbcType=INTEGER},
+      </if>
+      <if test="remark != null" >
+        REMARK = #{remark,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where GENERALCODE = #{generalCode,jdbcType=VARCHAR}
+  </update>
+</mapper>

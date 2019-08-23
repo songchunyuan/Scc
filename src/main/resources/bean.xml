@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 引入约束 -->
+<beans xmlns="http://www.springframework.org/schema/beans"  
+       xmlns:p="http://www.springframework.org/schema/p"  
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+       xsi:schemaLocation="  
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">  
+    
+    
+    <bean id="propertyConfigurer"
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:db.properties</value>
+            </list>
+        </property>
+    </bean>
+    
+    <!-- 简单属性配置 -->
+    <bean id="pictureVO" class="com.zeei.swm.vo.PictureVO">
+            <property name="rawUrl" value="${picture.rawUrl}"></property>
+            <property name="pictureUrl" value="${picture.pictureUrl}"></property>
+            <property name="nullUrl" value="${picture.nullUrl}"></property>
+    </bean>
+    
+    <bean id="ledVO" class="com.zeei.swm.vo.LedVO">
+           <property name="map">
+		      <map>
+		        <entry key="3D53C0" value="E" />
+		        <entry key="C81880" value="F" />
+		      <!--   <entry key="3D53C0" value="E" />
+		        <entry key="C85E8" value="E" />
+		        <entry key="C85E8" value="E" /> -->
+		      </map>
+           </property>
+    </bean>
+ </beans>

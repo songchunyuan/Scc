@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zeei.mcs.dao.WsystemStreamDao" >
+  <resultMap id="BaseResultMap" type="com.zeei.mcs.vo.WsystemStreamVO" >
+    <id column="streamCode" property="streamCode" jdbcType="VARCHAR" />
+    <result column="streamName" property="streamName" jdbcType="VARCHAR" />
+    <result column="code_wsystemwater" property="codeWsystemWater" jdbcType="VARCHAR" />
+  </resultMap>
+  
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    SELECT 
+	    STREAMCODE,
+	    STREAMNAME,
+	    CODE_WSYSTEMWATER
+    FROM T_DIC_WSYSTEMSTREAM
+    WHERE streamCode = #{streamCode,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectByPrimaryName" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    SELECT 
+	    STREAMCODE,
+	    STREAMNAME,
+	    CODE_WSYSTEMWATER
+    FROM T_DIC_WSYSTEMSTREAM
+    WHERE streamName = #{streamName,jdbcType=VARCHAR}
+  </select>
+  <select id="selectByPrimaryAll" parameterType="java.util.Map" resultType="com.zeei.mcs.vo.WsystemStreamVO">
+    SELECT 
+	    T1.STREAMCODE,
+	    T1.STREAMNAME,
+	    T1.CODE_WSYSTEMWATER AS codeWsystemWater,
+	    T2.WSYSTEMWATERNAME
+    FROM T_DIC_WSYSTEMSTREAM T1
+    INNER JOIN T_DIC_WSYSTEMRIVER T2 ON T1.CODE_WSYSTEMWATER=T2.CODE_WSYSTEMWATER
+    <where>
+		<if test="codeWsystemWater != null and codeWsystemWater != ''">AND T1.code_wsystemwater=#{codeWsystemWater}</if>
+		<if test="streamName != null and streamName != ''"> AND T1.streamName LIKE CONCAT('%',#{streamName},'%')</if>
+	</where>
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    DELETE FROM T_DIC_WSYSTEMSTREAM
+    WHERE streamCode = #{streamCode,jdbcType=VARCHAR}
+  </delete>
+  
+  <delete id="deleteByPrimaryList">
+    DELETE FROM T_DIC_WSYSTEMSTREAM
+    WHERE streamCode IN
+    <foreach collection="list" separator="," item="streamCode" open="(" close=")">
+			#{streamCode} 
+	</foreach>
+  </delete>
+
+  <insert id="insertSelective" parameterType="com.zeei.mcs.vo.WsystemStreamVO" >
+    INSERT INTO T_DIC_WSYSTEMSTREAM
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="streamCode != null" >
+        STREAMCODE,
+      </if>
+      <if test="streamName != null" >
+        STREAMNAME,
+      </if>
+      <if test="codeWsystemWater != null" >
+        CODE_WSYSTEMWATER,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="streamCode != null" >
+        #{streamCode,jdbcType=VARCHAR},
+      </if>
+      <if test="streamName != null" >
+        #{streamName,jdbcType=VARCHAR},
+      </if>
+      <if test="codeWsystemWater != null" >
+        #{codeWsystemWater,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  
+  <update id="updateByPrimaryKeySelective" parameterType="com.zeei.mcs.vo.WsystemStreamVO" >
+    UPDATE T_DIC_WSYSTEMSTREAM
+    <set >
+      <if test="streamName != null" >
+        streamName = #{streamName,jdbcType=VARCHAR},
+      </if>
+      <if test="codeWsystemWater != null" >
+        code_wsystemwater = #{codeWsystemWater,jdbcType=VARCHAR},
+      </if>
+    </set>
+    WHERE streamCode = #{streamCode,jdbcType=VARCHAR}
+  </update>
+  
+</mapper>

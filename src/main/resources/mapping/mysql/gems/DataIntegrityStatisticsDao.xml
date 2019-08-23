@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zeei.gems.dao.DataIntegrityStatisticsDao">
+
+	<select id="timeIntervalList" resultType="com.zeei.gems.vo.TimeIntervalVO">
+			SELECT
+			A.POINTCODE,
+			A.POINTNAME,
+			A.MICYCLETIME,
+			A.RTCYTLETIME,
+			B.REGIONNAME,A.POINTNAME
+			FROM
+			V_BAS_POINTSITE_INFO A
+			LEFT JOIN T_DIC_AREACODE B
+			ON B.CODE_REGION = A.REGIONCODE
+			WHERE
+			SYSTEMTYPE = #{systemType}
+			AND
+			A.POINTCODE
+			IN
+			<foreach item="pointCode" index="index" collection="pointCodeList"
+				open="(" separator="," close=")">
+				#{pointCode}
+			</foreach>
+	</select>
+
+	<select id="dataIntegrityStatisticsListForAir" resultType="com.zeei.gems.vo.DataIntegrityStatisticsVO">
+		SELECT MAX(A.POINTCODE) POINTCODE,MAX(C.REGIONNAME)
+		REGIONNAME,MAX(B.POINTNAME) POINTNAME,
+		<if test="dataType == 1">
+			SUBSTR(A.DATATIME,1,19) DATATIME
+		</if>
+		<if test="dataType == 2">
+			SUBSTR(A.DATATIME,1,16) DATATIME
+		</if>
+		<if test="dataType == 3">
+			SUBSTR(A.DATATIME,1,13) DATATIME
+		</if>
+		<if test="dataType == 4">
+			SUBSTR(A.DATATIME,1,10) DATATIME
+		</if>
+		FROM
+		<if test="systemType==22">
+			<if test="dataType == 3">
+				T_ENV_MONI_AIR_DATAHH
+			</if>
+			<if test="dataType == 4">
+				T_ENV_MONI_AIR_DATASATA
+			</if>
+			<if test="dataType == 1 || dataType == 2">
+				(${RTTable})
+			</if>
+			A
+			LEFT JOIN T_ENV_MONI_AIR_STATION B ON B.POINTCODE = A.POINTCODE
+			LEFT
+			JOIN T_DIC_AREACODE C ON C.CODE_REGION = B.REGIONCODE
+		</if>
+      	<if test="systemType == 31">
+			<if test="dataType == 3">
+				T_PS_BAS_GAS_DATAHH
+			</if>
+			<if test="dataType == 4">
+				T_PS_BAS_GAS_DATASATA
+			</if>
+			<if test="dataType == 1 || dataType == 2">
+				(${RTTable})
+			</if>
+			A
+			LEFT JOIN T_PS_BAS_POINTLIST B ON B.POINTCODE = A.POINTCODE
+			LEFT
+			JOIN T_DIC_AREACODE C ON C.CODE_REGION = B.REGIONCODE
+		</if>
+      	<if test="systemType == 32">
+      		<if test="dataType == 3">
+				T_PS_BAS_WAT_DATAHH
+			</if>
+			<if test="dataType == 4">
+				T_PS_BAS_WAT_DATASATA
+			</if>
+			<if test="dataType == 1 || dataType == 2">
+				(${RTTable})
+			</if>
+			A
+			LEFT JOIN T_PS_BAS_POINTLIST B ON B.POINTCODE = A.POINTCODE
+			LEFT
+			JOIN T_DIC_AREACODE C ON C.CODE_REGION = B.REGIONCODE
+		</if>
+		WHERE A.POINTCODE=#{pointCode}
+<!-- 		AND A.POLLUTECODE IN ( -->
+<!-- 		SELECT POLLUTECODE FROM -->
+<!-- 		V_ENV_STATIONPOLLINFO WHERE -->
+<!-- 		POINTCODE=123) -->
+		AND A.DATATIME&gt;=#{startTime}
+		AND A.DATATIME &lt;=#{endTime}
+		<if test="dataType == 1">
+			AND DATE_FORMAT(STR_TO_DATE(A.DATATIME,'%Y-%m-%d
+			%H:%i:%s'),'%s')%#{interval}=0
+			GROUP BY SUBSTR(A.DATATIME,1,19)
+		</if>
+		<if test="dataType == 2">
+			AND DATE_FORMAT(STR_TO_DATE(A.DATATIME,'%Y-%m-%d
+			%H:%i:%s'),'%i')%#{interval}=0
+			GROUP BY SUBSTR(A.DATATIME,1,16)
+		</if>
+		<if test="dataType == 3">
+			AND DATE_FORMAT(STR_TO_DATE(A.DATATIME,'%Y-%m-%d
+			%H:%i:%s'),'%H')%#{interval}=0
+			GROUP BY SUBSTR(A.DATATIME,1,13)
+		</if>
+		<if test="dataType == 4">
+			AND DATE_FORMAT(STR_TO_DATE(A.DATATIME,'%Y-%m-%d
+			%H:%i:%s'),'%d')%#{interval}=0
+			GROUP BY SUBSTR(A.DATATIME,1,10)
+		</if>
+	</select>
+
+	<insert id="fillDataCmd" parameterType="com.zeei.gems.vo.CmdVO">
+		INSERT INTO
+		T_BAS_COMMANDINFO(QN,POINTCODE,MSG,DATATIME,PRI)
+		VALUES(#{qn},#{pointCode},#{msg},#{dataTime},#{pri})
+	</insert>
+	<insert id="fillDataCmdRecord" parameterType="com.zeei.gems.vo.CmdVO">
+		INSERT INTO
+		T_BAS_COMPDATA_REC(QN,STDPOINTCODE,MSG,DATATIME,USERID,CMDSTATUS,REMARK)
+		VALUES(#{qn},#{stdPointCode},#{msg},#{dataTime},#{userId},#{cmdStatus},#{reMark})
+	</insert>
+	<insert id="fillDataCmdRecordDetail" parameterType="com.zeei.gems.vo.CmdVO">
+		INSERT INTO
+		T_BAS_COMPDATA_REC_DETAIL(QN,DATATIME,COLUMN_7,USERID,REMARK)
+		VALUES(#{qn},#{dataTime},#{column_7},#{userId},#{reMark})
+	</insert>
+	<select id="fillDataCmdRecordList" resultType="com.zeei.gems.vo.CmdVO">
+
+		SELECT
+		A.QN,A.STDPOINTCODE,
+		C.POINTNAME,
+		A.MSG,SUBSTR(A.DATATIME,1,19) DATATIME,A.USERID,B.USERNAME,A.CMDSTATUS,A.REMARK
+		FROM
+		T_BAS_COMPDATA_REC A
+		LEFT JOIN T_BAS_USER B
+		ON B.USERID=A.USERID
+		LEFT
+		JOIN
+		V_BAS_POINTSITE_INFO
+		C
+		ON C.STDPOINTCODE=A.STDPOINTCODE
+		WHERE C.POINTCODE IN
+		<foreach item="pointCode" index="index" collection="pointCodeList"
+			open="(" separator="," close=")">
+			#{pointCode}
+		</foreach>
+		ORDER BY A.DATATIME DESC
+	</select>
+</mapper>

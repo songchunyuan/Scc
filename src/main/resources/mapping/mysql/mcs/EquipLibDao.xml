@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zeei.mcs.dao.EquipLibDao" >
+  <resultMap id="BaseResultMap" type="com.zeei.mcs.vo.EquipLibVO" >
+    <id column="EID" property="eid" jdbcType="INTEGER" />
+    <result column="EQUIPCODE" property="equipCode" jdbcType="VARCHAR" />
+    <result column="ETYPECODE" property="etypeCode" jdbcType="VARCHAR" />
+    <result column="EQUIPNAME" property="equipName" jdbcType="VARCHAR" />
+    <result column="EGROUP" property="egroup" jdbcType="VARCHAR" />
+  </resultMap>
+  
+  <sql id="Base_Column_List" >
+    EID, EQUIPCODE, ETYPECODE, EQUIPNAME, EGROUP
+  </sql>
+
+  <select id="selectByPrimaryKey" parameterType="java.util.Map" resultType="com.zeei.mcs.vo.EquipLibVO" >
+    SELECT 
+    	E.EID,
+    	E.EQUIPCODE,
+    	E.ETYPECODE,
+    	T.ETYPENAME,
+    	E.EQUIPNAME,
+    	E.EGROUP
+    FROM T_BAS_EQUIPLIB E
+    left join T_BAS_EQUIPTYPE T on E.ETYPECODE=T.ETYPECODE
+    <where>
+		<if test="equipName != null and equipName != ''">equipName LIKE CONCAT('%',#{equipName},'%')</if>
+	</where>
+  </select>
+  
+  <select id="selectByPrimary" parameterType="java.util.Map" resultType="com.zeei.mcs.vo.EquipLibVO" >
+    SELECT 
+    	EID,
+    	EQUIPCODE,
+    	ETYPECODE,
+    	EQUIPNAME,
+    	EGROUP
+    FROM T_BAS_EQUIPLIB
+    <where>
+		<if test="eid != null">eid = #{eid}</if>
+		<if test="equipName != null">AND equipName = #{equipName}</if>
+	</where>
+  </select>
+  
+    <select id="selectByPrimaryGroup" parameterType="java.util.Map" resultType="com.zeei.mcs.vo.EquipLibVO" >
+    SELECT 
+    	EID,
+    	EQUIPCODE,
+    	ETYPECODE,
+    	EQUIPNAME,
+    	EGROUP
+    FROM T_BAS_EQUIPLIB
+    <where>
+		<if test="egroup != null">egroup = #{egroup}</if>
+	</where>
+  </select>
+  
+  <delete id="deleteByPrimaryKey">
+    DELETE FROM T_BAS_EQUIPLIB
+    WHERE EID IN
+    <foreach collection="list" separator="," item="id" open="(" close=")">
+		#{id} 
+	</foreach>
+  </delete>
+
+  <insert id="insertSelective" useGeneratedKeys="true" keyProperty="eid" parameterType="com.zeei.mcs.vo.EquipLibVO" >
+    INSERT INTO T_BAS_EQUIPLIB
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="eid != null" >
+        EID,
+      </if>
+      <if test="equipCode != null" >
+        EQUIPCODE,
+      </if>
+      <if test="etypeCode != null" >
+        ETYPECODE,
+      </if>
+      <if test="equipName != null" >
+        EQUIPNAME,
+      </if>
+      <if test="egroup != null" >
+        EGROUP,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="eid != null" >
+        #{eid,jdbcType=INTEGER},
+      </if>
+      <if test="equipCode != null" >
+        #{equipCode,jdbcType=VARCHAR},
+      </if>
+      <if test="etypeCode != null" >
+        #{etypeCode,jdbcType=VARCHAR},
+      </if>
+      <if test="equipName != null" >
+        #{equipName,jdbcType=VARCHAR},
+      </if>
+      <if test="egroup != null" >
+        #{egroup,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.zeei.mcs.vo.EquipLibVO" >
+    UPDATE T_BAS_EQUIPLIB
+    <set >
+      <if test="equipCode != null" >
+        EQUIPCODE = #{equipCode,jdbcType=VARCHAR},
+      </if>
+      <if test="etypeCode != null" >
+        ETYPECODE = #{etypeCode,jdbcType=VARCHAR},
+      </if>
+      <if test="equipName != null" >
+        EQUIPNAME = #{equipName,jdbcType=VARCHAR},
+      </if>
+      <if test="egroup != null" >
+        EGROUP = #{egroup,jdbcType=VARCHAR},
+      </if>
+    </set>
+    WHERE EID = #{eid,jdbcType=INTEGER}
+  </update>
+
+  <update id="updateByPrimaryGroup" parameterType="com.zeei.mcs.vo.EquipLibVO" >
+    UPDATE T_BAS_EQUIPLIB
+    <set>
+      <if test="egroup != null" >
+        EGROUP = null,
+      </if>
+    </set>
+    WHERE egroup = #{egroup,jdbcType=INTEGER}
+  </update>
+</mapper>

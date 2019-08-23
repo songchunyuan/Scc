@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zeei.cdq.dao.RealTimeDataDao">
+
+	<select id="realTimeDataList" parameterType="Map" resultType="com.zeei.cdq.vo.RealTimeDataVO" >
+		SELECT SUBSTR(A.DATATIME,1,19) DATATIME,FORMAT(A.DATAVALUE,B.NUMPRECISION) DATAVALUE,C.STDPOINTCODE, B.POINTCODE,B.POINTNAME,D.REGIONNAME,B.POLLUTENAME,B.POLLUTECODE,F.SCODE,F.SNAME,
+			A.POINTCODE, C.STATUS ,FORMAT(E.SMAXVALUE,B.NUMPRECISION) SMAXVALUE,FORMAT(E.SMINVALUE,B.NUMPRECISION) SMINVALUE,C.HASVIDEO,B.POLLUTECLASS
+		FROM T_BAS_DATALATEST A
+		INNER JOIN (SELECT MAX(DATATIME) DATATIME,POINTCODE FROM T_BAS_DATALATEST  GROUP BY POINTCODE) T ON A.POINTCODE=T.POINTCODE AND A.DATATIME=T.DATATIME
+		INNER JOIN V_ENV_STATIONPOLLINFO B ON A.POINTCODE = B.POINTCODE AND A.POLLUTECODE = B.POLLUTECODE
+		INNER JOIN V_BAS_POINTSITE_INFO C ON C.POINTCODE = B.POINTCODE AND C.STATUS!=-1
+		LEFT JOIN T_DIC_AREACODE D ON D.CODE_REGION = C.REGIONCODE
+		LEFT JOIN T_DIC_POLLSTD_DETAIL E ON E.SCODE = C.SCODE AND E.POLLUTECODE = B.POLLUTECODE
+		LEFT JOIN T_DIC_POLLSTD F ON F.SCODE = E.SCODE
+ 		WHERE 1 = 1	
+		<if test="vo.startTime != null and vo.endTime != null">
+			AND A.DATATIME &gt;= #{vo.startTime}  AND A.DATATIME &lt;= #{vo.endTime}
+		</if>
+		<if test="paramMap != null">
+			<if test="paramMap.polluteCodes != null">
+				AND A.POLLUTECODE IN
+				<foreach item="polluteCode" index="index" collection="paramMap.polluteCodes" open="(" separator="," close=")">
+					#{polluteCode}
+				</foreach>
+			</if>
+			<if test="paramMap.pointCodes != null">
+				AND A.POINTCODE IN 
+				<foreach item="pointCode" index="index" collection="paramMap.pointCodes" open="(" separator="," close=")">
+					#{pointCode}
+				</foreach>
+			</if>
+			<if test="paramMap.status != null">
+				AND C.status = #{paramMap.status}
+			</if>
+		</if>
+		
+		ORDER BY A.DATATIME
+
+	</select>
+
+	<select id="realTimeDataCount" parameterType="Map" resultType="com.zeei.cdq.vo.RealTimeDataVO">
+		SELECT  DISTINCT A.DATATIME,A.POINTCODE
+		FROM T_BAS_DATALATEST A
+		INNER JOIN (SELECT MAX(DATATIME) DATATIME,POINTCODE FROM T_BAS_DATALATEST  GROUP BY POINTCODE) T ON A.POINTCODE=T.POINTCODE AND A.DATATIME=T.DATATIME
+		INNER JOIN V_ENV_STATIONPOLLINFO B ON A.POINTCODE = B.POINTCODE AND A.POLLUTECODE = B.POLLUTECODE
+		INNER JOIN V_BAS_POINTSITE_INFO C ON C.POINTCODE = B.POINTCODE
+		LEFT JOIN T_DIC_AREACODE D ON D.CODE_REGION = C.REGIONCODE
+		LEFT JOIN T_DIC_POLLSTD_DETAIL E ON E.SCODE = C.SCODE AND E.POLLUTECODE = B.POLLUTECODE
+		LEFT JOIN T_DIC_POLLSTD F ON F.SCODE = E.SCODE
+ 		WHERE 1 = 1	
+		<if test="paramMap != null">
+			<if test="paramMap.polluteCodes != null">
+				AND A.POLLUTECODE IN
+				<foreach item="polluteCode" index="index" collection="paramMap.polluteCodes" open="(" separator="," close=")">
+					#{polluteCode}
+				</foreach>
+			</if>
+			<if test="paramMap.pointCodes != null">
+				AND A.POINTCODE IN 
+				<foreach item="pointCode" index="index" collection="paramMap.pointCodes" open="(" separator="," close=")">
+					#{pointCode}
+				</foreach>
+			</if>
+			<if test="paramMap.status != null">
+				AND C.status = #{paramMap.status}
+			</if>
+		</if>
+		ORDER BY A.DATATIME
+	</select>
+
+	<select id="realTimeDatGetPointInfo" parameterType="int" resultType="com.zeei.gems.vo.StationVO">
+		SELECT A.POINTNAME,B.REGIONNAME FROM V_BAS_POINTSITE_INFO A
+		LEFT JOIN T_DIC_AREACODE B ON A.REGIONCODE = B.CODE_REGION
+		WHERE A.POINTCODE = #{pointCode}
+	</select>
+
+	<select id="getPointCodeByPointName" parameterType="java.util.Map" resultType="String">
+		SELECT POINTCODE 
+		FROM V_BAS_POINTSITE_INFO
+		WHERE POINTNAME = #{pointName} AND SYSTEMTYPE=#{systemType}
+	</select>
+	
+	<select id="realTimeDataChart" parameterType="Map" resultType="Map">
+		select A.DATAVALUE AS value,A.DATATIME AS dataTime,B.POLLCONCUNIT AS unit,D.SMAXVALUE
+		from ${table} A
+		LEFT JOIN V_ENV_STATIONPOLLINFO B on B.POINTCODE = A.POINTCODE AND A.POLLUTECODE = B.POLLUTECODE
+		LEFT JOIN T_DIC_POLLSTD_DETAIL D ON A.POLLUTECODE = D.POLLUTECODE	
+		where A.POINTCODE = #{pointCode}
+		and A.POLLUTECODE = #{polluteCode}
+		group by A.DATATIME
+		order by A.DATATIME desc
+		LIMIT 0,20
+	</select>
+	
+	<select id="realTimeDatSTDInfo" parameterType="String" resultType="com.zeei.gems.vo.StandardVO">
+		SELECT A.*,B.SMAXVALUE,B.SMINVALUE,C.POLLCONCUNIT SUNIT, C.POLLUTENAME, C.POLLUTECODE
+		FROM T_DIC_POLLSTD A
+		LEFT JOIN T_DIC_POLLSTD_DETAIL B ON A.SCODE = B.SCODE
+		LEFT JOIN T_DIC_STDPOLLCODE C ON C.POLLUTECODE = B.POLLUTECODE
+		WHERE A.SCODE = #{sCode}
+	</select>
+	
+	<select id="realTimeStationList" parameterType="Map" resultType="com.zeei.gems.vo.StationVO">
+		SELECT SUBSTR(T.DATATIME,1,19) DATATIME,C.POINTCODE,C.POINTNAME,D.REGIONNAME,F.SCODE,F.SNAME,C.STATUS,
+C.HASVIDEO FROM V_BAS_POINTSITE_INFO C LEFT JOIN ( 
+ SELECT MAX(DATATIME) DATATIME,POINTCODE FROM T_BAS_DATALATEST GROUP BY POINTCODE) T ON C.POINTCODE=T.POINTCODE 
+INNER JOIN T_DIC_AREACODE D ON D.CODE_REGION = C.REGIONCODE 
+LEFT JOIN T_DIC_POLLSTD F ON F.SCODE = C.SCODE WHERE 1 = 1 AND C.STATUS!=-1
+<if test="paramMap != null">
+			<if test="paramMap.pointCodes != null">
+				AND C.POINTCODE IN 
+				<foreach item="pointCode" index="index" collection="paramMap.pointCodes" open="(" separator="," close=")">
+					#{pointCode}
+				</foreach>
+			</if>
+			<if test="paramMap.status != null">
+				AND C.status = #{paramMap.status}
+			</if>
+		</if>
+		 ORDER BY T.DATATIME
+	</select>
+</mapper>

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zeei.gems.dao.DataExceedStandardDao">
+
+
+	<select id="dataExceedStandardListForAir" resultType="com.zeei.gems.vo.DataExceedStandardVO">
+		SELECT B.POINTNAME,
+		E.REGIONNAME,
+		F.POLLUTENAME,
+		<if test="dataType == 1">
+			SUBSTR(A.DATATIME,1,19) DATATIME,
+		</if>
+		<if test="dataType == 2">
+			SUBSTR(A.DATATIME,1,16) DATATIME,
+		</if>
+		<if test="dataType == 3">
+			SUBSTR(A.DATATIME,1,13) DATATIME,
+		</if>
+		<if test="dataType == 4">
+			SUBSTR(A.DATATIME,1,10) DATATIME,
+		</if>
+		A.DATAVALUE,
+		B.SUNIT,
+		B.SMINVALUE,
+		B.SMAXVALUE
+		FROM
+		<if test="dataType == 3">
+			<if test="dataSource == 0">
+			T_ENV_MONI_AIR_DATAHH 
+		    </if>
+			<if test="dataSource == 1">
+			T_ENV_MONI_AIR_AUDDATAHH   
+			</if>
+		</if>
+		<if test="dataType == 4">
+			T_ENV_MONI_AIR_DATASATA 
+		</if>
+		<if test="dataType == 1 || dataType == 2">
+			(${RTTable})
+		</if>
+		A
+		LEFT JOIN V_BAS_POLLSTD B
+		ON B.POINTCODE = A.POINTCODE
+		AND
+		B.POLLUTECODE=A.POLLUTECODE AND B.SYSTEMTYPE =#{systemType}
+		AND
+		B.PSCODE=#{pointCode}
+		LEFT JOIN
+		T_DIC_AREACODE E
+		ON
+		E.CODE_REGION=B.REGIONCODE
+		LEFT JOIN
+		T_DIC_STDPOLLCODE F
+		ON
+		F.POLLUTECODE=A.POLLUTECODE
+		WHERE A.DATATIME
+		&gt;=#{startTime}
+		AND
+		A.DATATIME &lt;=#{endTime}
+		AND (
+		A.DATAVALUE &gt;= B.SMAXVALUE
+		OR
+		A.DATAVALUE &lt;= B.SMINVALUE
+		)
+		<if test="dataType == 1">
+			AND DATE_FORMAT(STR_TO_DATE(A.DATATIME,'%Y-%m-%d
+			%H:%i:%s'),'%s')%#{interval}=0
+		</if>
+		<if test="dataType == 2">
+			AND DATE_FORMAT(STR_TO_DATE(A.DATATIME,'%Y-%m-%d
+			%H:%i:%s'),'%i')%#{interval}=0
+			AND
+			A.DATATIME=STR_TO_DATE(A.DATATIME,'%Y-%m-%d %H:%i:00')
+		</if>
+		<if test="dataType == 3">
+			AND DATE_FORMAT(STR_TO_DATE(A.DATATIME,'%Y-%m-%d
+			%H:%i:%s'),'%H')%#{interval}=0
+			AND
+			A.DATATIME=STR_TO_DATE(A.DATATIME,'%Y-%m-%d %H:00:00')
+		</if>
+		<if test="dataType == 4">
+			AND DATE_FORMAT(STR_TO_DATE(A.DATATIME,'%Y-%m-%d
+			%H:%i:%s'),'%d')%#{interval}=0
+			AND
+			A.DATATIME=STR_TO_DATE(A.DATATIME,'%Y-%m-%d 00:00:00')
+			AND MONITORTYPE=3
+		</if>
+		AND A.POINTCODE =#{pointCode}
+		ORDER BY
+		A.POINTCODE,A.DATATIME,A.POLLUTECODE ASC
+
+	</select>
+	
+	<select id="dataExceedStandardDayListForAir" resultType="com.zeei.gems.vo.DataExceedStandardVO">
+		SELECT B.POINTNAME,
+		E.REGIONNAME,
+		F.POLLUTENAME,
+		SUBSTR(A.DATATIME,1,10) DATATIME,
+		A.AVGVALUE,
+		B.SUNIT,
+		B.SMINVALUE,
+		B.SMAXVALUE
+		FROM T_ENV_MONI_AIR_DATASATA A
+		LEFT JOIN V_BAS_POLLSTD B
+		ON B.POINTCODE = A.POINTCODE
+		AND
+		B.POLLUTECODE=A.POLLUTECODE AND B.SYSTEMTYPE =#{systemType}
+		<if test="list != null">
+			AND B.PSCODE IN
+			<foreach item="pointCode" index="index" collection="list" open="(" separator="," close=")">
+				#{pointCode}
+			</foreach>
+		</if>
+		LEFT JOIN
+		T_DIC_AREACODE E
+		ON
+		E.CODE_REGION=B.REGIONCODE
+		LEFT JOIN
+		T_DIC_STDPOLLCODE F
+		ON
+		F.POLLUTECODE=A.POLLUTECODE
+		WHERE A.DATATIME
+		&gt;=#{startTime}
+		AND
+		A.DATATIME &lt;=#{endTime}
+		AND (
+		A.AVGVALUE &gt;= B.SMAXVALUE
+		OR
+		A.AVGVALUE &lt;= B.SMINVALUE
+		)
+			AND DATE_FORMAT(STR_TO_DATE(A.DATATIME,'%Y-%m-%d
+			%H:%i:%s'),'%d')%#{interval}=0
+			AND
+			A.DATATIME=STR_TO_DATE(A.DATATIME,'%Y-%m-%d 00:00:00')
+			AND MONITORTYPE=3
+		AND A.POINTCODE =#{pointCode}
+		ORDER BY
+		A.POINTCODE,A.DATATIME,A.POLLUTECODE ASC
+
+	</select>
+</mapper>

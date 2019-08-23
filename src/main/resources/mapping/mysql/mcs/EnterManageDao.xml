@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zeei.mcs.dao.EnterManageDao">
+  <resultMap id="BaseResultMap" type="com.zeei.mcs.vo.EnterManageVO" >
+    <id column="PSCODE" property="pscode" jdbcType="INTEGER" />
+    <result column="ENTERNAME" property="enterName" jdbcType="VARCHAR" />
+    <result column="YEARMN" property="yearMN" jdbcType="INTEGER" />
+    <result column="ISDANGERSOURCE" property="isDangerSource" jdbcType="INTEGER" />
+    <result column="COD_CONTROL_VALUE" property="codControlValue" jdbcType="DOUBLE" />
+    <result column="NH3_CONTROL_VALUE" property="nh3ControlValue" jdbcType="DOUBLE" />
+    <result column="SO2_CONTROL_VALUE" property="so2ControlValue" jdbcType="DOUBLE" />
+    <result column="NOX_CONTROL_VALUE" property="noxControlValue" jdbcType="DOUBLE" />
+  </resultMap>
+    <sql id="Base_Column_List" >
+    PSCODE, YEARMN, ISDANGERSOURCE, COD_CONTROL_VALUE, NH3_CONTROL_VALUE, SO2_CONTROL_VALUE, 
+    NOX_CONTROL_VALUE,WATERAPPROVALVALUE,GASAPPROVALVALUE
+  </sql>
+	
+	<insert id="insertEnterManage" parameterType="com.zeei.mcs.vo.EnterManageVO"  >
+		INSERT INTO T_PS_BAS_ENTERMANAGE(YEARMN,PSCODE,ISDANGERSOURCE)
+		VALUES(YEAR(NOW()),#{pscode},#{isDangerSource})
+	</insert>
+	
+	<update id="updateEnterManageById" parameterType="com.zeei.mcs.vo.EnterManageVO">
+	    UPDATE T_PS_BAS_ENTERMANAGE
+	      SET  
+	      	ISDANGERSOURCE = #{isDangerSource}
+	     WHERE pscode = #{pscode} AND yearmn=YEAR(NOW())
+	</update>
+	
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="com.zeei.mcs.vo.EnterManageVO" >
+    SELECT 
+    <include refid="Base_Column_List" />
+    FROM T_PS_BAS_ENTERMANAGE
+   <where>
+			<if test="pscode != null and pscode != ''">AND PSCODE=#{pscode}</if>
+			<if test="yearMN !=null ">AND yearmn=#{yearMN}</if>
+	</where>
+  </select>
+  
+  <select id="selectByPrimaryAll" parameterType="java.util.Map" resultType="com.zeei.mcs.vo.EnterManageVO">
+    SELECT 
+    	T1.PSCODE,
+    	T2.ENTERNAME,
+    	T1.YEARMN,
+    	T1.ISDANGERSOURCE,
+		T1.COD_CONTROL_VALUE AS codControlValue,
+		T1.NH3_CONTROL_VALUE AS nh3ControlValue,
+		T1.SO2_CONTROL_VALUE AS so2ControlValue, 
+    	T1.NOX_CONTROL_VALUE AS noxControlValue
+    FROM T_PS_BAS_ENTERMANAGE T1
+    INNER JOIN T_PS_BAS_ENTERLIST T2 ON T1.PSCODE=T2.PSCODE
+   <where>
+			<if test="enterName != null and enterName != ''">AND T2.ENTERNAME LIKE CONCAT('%',#{enterName},'%')</if>
+			<if test="yearMN != null and yearMN != ''">AND T1.YEARMN=#{yearMN}</if>
+	</where>
+  </select>
+  
+  <select id="validEnterName" parameterType="java.util.Map" resultType="com.zeei.mcs.vo.EnterManageVO">
+    SELECT 
+    	T1.PSCODE,
+    	T2.ENTERNAME,
+    	T1.YEARMN,
+    	T1.ISDANGERSOURCE,
+		T1.COD_CONTROL_VALUE AS codControlValue,
+		T1.NH3_CONTROL_VALUE AS nh3ControlValue,
+		T1.SO2_CONTROL_VALUE AS so2ControlValue, 
+    	T1.NOX_CONTROL_VALUE AS noxControlValue
+    FROM T_PS_BAS_ENTERMANAGE T1
+    INNER JOIN T_PS_BAS_ENTERLIST T2 ON T1.PSCODE=T2.PSCODE
+   <where>
+			<if test="pscode != null and pscode != ''">AND T1.PSCODE =#{pscode}</if>
+			<if test="yearMN != null and yearMN != ''">AND T1.YEARMN=#{yearMN}</if>
+	</where>
+  </select>
+  
+  <delete id="deleteByPrimaryList" parameterType="com.zeei.mcs.vo.EnterManageVO">
+    DELETE FROM T_PS_BAS_ENTERMANAGE
+    WHERE PSCODE = #{pscode,jdbcType=INTEGER}
+	AND YEARMN = #{yearMN,jdbcType=INTEGER}
+  </delete>
+  
+   
+  <delete id="deleteByPrimaryKey" parameterType="com.zeei.mcs.vo.EnterManageVO" >
+    DELETE FROM T_PS_BAS_ENTERMANAGE
+    WHERE PSCODE = #{pscode,jdbcType=INTEGER}
+	AND YEARMN = #{yearMN,jdbcType=INTEGER}
+  </delete>
+	
+	<insert id="insertSelective" parameterType="com.zeei.mcs.vo.EnterManageVO" >
+    insert into T_PS_BAS_ENTERMANAGE
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="pscode != null" >
+        PSCODE,
+      </if>
+      <if test="yearMN != null" >
+        YEARMN,
+      </if>
+      <if test="isDangerSource != null" >
+        ISDANGERSOURCE,
+      </if>
+      <if test="codControlValue != null" >
+        COD_CONTROL_VALUE,
+      </if>
+      <if test="nh3ControlValue != null" >
+        NH3_CONTROL_VALUE,
+      </if>
+      <if test="so2ControlValue != null" >
+        SO2_CONTROL_VALUE,
+      </if>
+      <if test="noxControlValue != null" >
+        NOX_CONTROL_VALUE,
+      </if>
+      <if test="waterApprovalValue != null" >
+        WATERAPPROVALVALUE,
+      </if>
+      <if test="gasApprovalValue != null" >
+        GASAPPROVALVALUE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="pscode != null" >
+        #{pscode,jdbcType=INTEGER},
+      </if>
+      <if test="yearMN != null" >
+        #{yearMN,jdbcType=INTEGER},
+      </if>
+      <if test="isDangerSource != null" >
+        #{isDangerSource,jdbcType=INTEGER},
+      </if>
+      <if test="codControlValue != null" >
+        #{codControlValue,jdbcType=DOUBLE},
+      </if>
+      <if test="nh3ControlValue != null" >
+        #{nh3ControlValue,jdbcType=DOUBLE},
+      </if>
+      <if test="so2ControlValue != null" >
+        #{so2ControlValue,jdbcType=DOUBLE},
+      </if>
+      <if test="noxControlValue != null" >
+        #{noxControlValue,jdbcType=DOUBLE},
+      </if>
+      <if test="waterApprovalValue != null" >
+        #{waterApprovalValue},
+      </if>
+      <if test="gasApprovalValue != null" >
+        #{gasApprovalValue},
+      </if>
+    </trim>
+  </insert>
+  
+  <update id="updateByPrimaryKeySelective" parameterType="com.zeei.mcs.vo.EnterManageVO" >
+    UPDATE T_PS_BAS_ENTERMANAGE
+    <set >
+      <if test="yearMN != null" >
+        YEARMN = #{yearMN,jdbcType=INTEGER},
+      </if>
+      <if test="isDangerSource != null" >
+        ISDANGERSOURCE = #{isDangerSource,jdbcType=INTEGER},
+      </if>
+      <if test="codControlValue != null" >
+        COD_CONTROL_VALUE = #{codControlValue,jdbcType=DOUBLE},
+      </if>
+      <if test="nh3ControlValue != null" >
+        NH3_CONTROL_VALUE = #{nh3ControlValue,jdbcType=DOUBLE},
+      </if>
+      <if test="so2ControlValue != null" >
+        SO2_CONTROL_VALUE = #{so2ControlValue,jdbcType=DOUBLE},
+      </if>
+      <if test="noxControlValue != null" >
+        NOX_CONTROL_VALUE = #{noxControlValue,jdbcType=DOUBLE},
+      </if>
+       <if test="waterApprovalValue != null" >
+        WATERAPPROVALVALUE=#{waterApprovalValue},
+      </if>
+      <if test="gasApprovalValue != null" >
+        GASAPPROVALVALUE=#{gasApprovalValue},
+      </if>
+    </set>
+    WHERE PSCODE = #{pscode,jdbcType=INTEGER} AND yearmn=YEAR(NOW())
+  </update>
+  
+</mapper>

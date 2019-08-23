@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zeei.mcs.dao.WoPointExtDao">
+
+	<insert id="insertWoPointExt" parameterType="com.zeei.mcs.vo.WoPointExtVO">
+		INSERT INTO T_PS_BAS_WOPOINTEXT(POINTCODE
+		<if test="codeWaterArea !=null and codeWaterArea !=''">
+			,CODE_WATERAREA       
+		</if>
+		<if test="codeOutRule !=null and codeOutRule !=''">
+			,CODE_OUTRULE       
+		</if>
+		<if test="standCode !=null and standCode !=''">
+			,STANDCODE       
+		</if>
+		<if test="outEnterCode !=null and outEnterCode !=''">
+			,OUTENTERCODE       
+		</if>
+		<if test="outEnterName !=null and outEnterName !=''">
+			,OUTENTERNAME       
+		</if>
+		<if test="limitType !=null and limitType !=''">
+			,LIMIT_TYPE       
+		</if>
+		<if test="estuaryLongitude !=null ">
+			,ESTUARYLONGITUDE       
+		</if>
+		<if test="estuaryLatitude !=null ">
+			,ESTUARYLATITUDE       
+		</if>
+		<if test="stand !=null and stand !=''">
+			,STAND       
+		</if>
+		<if test="description !=null and description !=''">
+			,DESCRIPTION       
+		</if>
+		<if test="receivingWater !=null and receivingWater !=''">
+			,RECEIVINGWATER       
+		</if>
+		)
+		values(#{pointCode}
+		<if test="codeWaterArea !=null and codeWaterArea !=''">
+			,#{codeWaterArea}       
+		</if>
+		<if test="codeOutRule !=null and codeOutRule !=''">
+			,#{codeOutRule}   
+		</if>
+		<if test="standCode !=null and standCode !=''">
+			,#{standCode}       
+		</if>
+		<if test="outEnterCode !=null and outEnterCode !=''">
+			,#{outEnterCode}       
+		</if>
+		<if test="outEnterName !=null and outEnterName !=''">
+			,#{outEnterName}       
+		</if>
+		<if test="limitType !=null and limitType !=''">
+			,#{limitType}       
+		</if>
+		<if test="estuaryLongitude !=null ">
+			,#{estuaryLongitude}       
+		</if>
+		<if test="estuaryLatitude !=null ">
+			,#{estuaryLatitude}       
+		</if>
+		<if test="stand !=null and stand !=''">
+			,#{stand}       
+		</if>
+		<if test="description !=null and description !=''">
+			,#{description}       
+		</if>
+		<if test="receivingWater !=null and receivingWater !=''">
+			,#{receivingWater}       
+		</if>
+		)
+	</insert>
+</mapper>

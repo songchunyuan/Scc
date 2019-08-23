@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zeei.mcs.dao.FactorDao">
+	<resultMap id="BaseResultMap" type="com.zeei.mcs.vo.FactorVO">
+		<id column="GROUPCODE" property="groupCode" jdbcType="INTEGER" />
+		<result column="GROUPNAME" property="groupName" jdbcType="NVARCHAR" />
+		<result column="GROUPTYPE" property="groupType" jdbcType="NUMERIC" />
+		<result column="ORDERNUM" property="orderNum" jdbcType="INTEGER" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		POLLUTECODE, POLLUTENAME,POLLCONCUNIT, ORDERNUM
+	</sql>
+	
+	<select id="selectFactorList" resultMap="BaseResultMap"
+		parameterType="java.util.Map">
+		SELECT DISTINCT * FROM (SELECT
+		t.POLLUTECODE,t.POLLUTENAME,t.ORDERNUM,t.POLLCONCUNIT
+		FROM V_ENV_STATIONPOLLINFO t
+		WHERE t.POINTCODE=#{pointCode,jdbcType=INTEGER}
+		AND t.systemtype=#{systemType}
+		) te
+		ORDER BY te.ORDERNUM DESC,te.POLLUTECODE
+	</select>
+	
+	<select id="factorListByPointCodeList" resultType="com.zeei.mcs.vo.FactorVO" 
+		parameterType="List">
+		SELECT DISTINCT * FROM (SELECT
+		t.POLLUTECODE,t.POLLUTENAME,t.ORDERNUM
+		FROM V_ENV_STATIONPOLLINFO t
+		WHERE t.POINTCODE IN
+			<foreach index="index" item="item" collection="list"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		) te
+		ORDER BY te.ORDERNUM DESC,te.POLLUTECODE
+	</select>
+
+	<select id="selectFactorListByFactorId" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		SELECT t.POINTCODE,t.POINTNAME,t.POLLUTECODE,t.POLLUTENAME,t.POLLCONCUNIT
+ 		FROM V_ENV_STATIONPOLLINFO t WHERE t.POLLUTECODE IN 
+			<foreach index="index" item="item" collection="polluteCode"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+			AND t.POINTCODE=#{pointCode,jdbcType=INTEGER}
+			AND t.systemtype=#{systemType}
+			ORDER BY t.ORDERNUM DESC,t.POLLUTECODE
+	</select>	
+
+	<select id="selectFactorListByFactorAndPoint" resultType="com.zeei.mcs.vo.FactorVO" 
+		parameterType="com.zeei.mcs.vo.MonitorGactorVOKey">
+		SELECT distinct t.POINTCODE,t.POINTNAME,t.POLLUTECODE,t.POLLUTENAME, t.POLLCONCUNIT
+ 		FROM V_ENV_STATIONPOLLINFO t 
+ 		WHERE t.POLLUTECODE IN 
+			<foreach index="index" item="item" collection="polluteCode"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		<if test="pointCodeList != null">
+		AND t.POINTCODE IN 
+			<foreach index="index" item="item" collection="pointCodeList"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		GROUP BY t.POLLUTECODE,t.POLLUTENAME
+		ORDER BY t.ORDERNUM DESC,t.POLLUTECODE
+	</select>	
+</mapper>

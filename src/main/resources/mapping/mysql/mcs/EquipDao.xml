@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zeei.mcs.dao.EquipDao">
+	
+	<select id="queryPointEquipByCondition" parameterType="java.util.Map" resultType="com.zeei.mcs.vo.Equip">		
+  		SELECT 
+		  e.eid,
+		  e.pointcode,
+		  e.equipname,
+		  e.equiptype,
+		  e.rundate,
+		  e.equipcode,
+		  e.maintenanceunit,
+		  e.maintunitcontact,
+		  e.maintunitcontactphone,
+		  e.instaldate,
+		  e.expirationdate,
+		  e.etypecode,
+		  t.etypename AS etypeName,
+		  e.elibid,
+		  b.equipname AS elibName
+		FROM
+		  T_BAS_EQUIP e 
+		  LEFT JOIN T_BAS_EQUIPTYPE t 
+		    ON e.ETYPECODE = t.ETYPECODE
+		  LEFT JOIN T_BAS_EQUIPLIB b
+		  	ON e.elibid=b.eid
+ 		 <where>
+	  		<if test="pointCode !=null">AND e.pointcode = #{pointCode}</if>
+	  	</where>
+		ORDER BY e.eid DESC
+	</select>
+	
+	<insert id="insertEquip" parameterType="com.zeei.mcs.vo.Equip"  keyProperty="eid" useGeneratedKeys="true" >
+		INSERT INTO T_BAS_EQUIP
+		<trim prefixOverrides="," prefix="(">
+		 	<if test="equipCode !=null and equipCode != ''">
+		 		,EQUIPCODE
+		 	</if>
+		 	<if test="pointCode !=null">
+		 		,POINTCODE
+		 	</if>
+		 	<if test="etypeCode !=null and etypeCode != ''">
+		 		,ETYPECODE
+		 	</if>
+		 	<if test="equipName !=null and equipName != ''">
+				,EQUIPNAME  
+			</if>       
+		 	<if test="equipType !=null and equipType != ''">
+				,EQUIPTYPE  
+			</if>       
+			<if test="runDate !=null">
+				,RUNDATE              
+			</if>
+			<if test="maintenanceUnit !=null and maintenanceUnit != ''">
+				,MAINTENANCEUNIT      
+			</if>
+			<if test="maintUnitContact !=null and maintUnitContact != ''">
+				,MAINTUNITCONTACT     
+			</if>
+			<if test="maintUnitContactPhone !=null and maintUnitContactPhone != ''">
+				,MAINTUNITCONTACTPHONE
+			</if>
+			<if test="instalDate !=null">
+				,INSTALDATE
+			</if>
+			<if test="expirationDate !=null">
+				,EXPIRATIONDATE
+			</if>
+			<if test="elibId !=null">
+				,ELIBID
+			</if>
+		</trim>
+		)
+		VALUES
+		<trim prefixOverrides="," prefix="(">
+		 	<if test="equipCode !=null and equipCode != ''">
+		 		,#{equipCode}
+		 	</if>
+		 	<if test="pointCode !=null">
+		 		,#{pointCode}
+		 	</if>
+		 	<if test="etypeCode !=null and etypeCode != ''">
+		 		,#{etypeCode}
+		 	</if>
+		 	<if test="equipName !=null and equipName != ''">
+				,#{equipName}  
+			</if>       
+		 	<if test="equipType !=null and equipType != ''">
+				,#{equipType}  
+			</if>       
+			<if test="runDate !=null">
+				,#{runDate}              
+			</if>
+			<if test="maintenanceUnit !=null and maintenanceUnit != ''">
+				,#{maintenanceUnit}      
+			</if>
+			<if test="maintUnitContact !=null and maintUnitContact != ''">
+				,#{maintUnitContact}     
+			</if>
+			<if test="maintUnitContactPhone !=null and maintUnitContactPhone != ''">
+				,#{maintUnitContactPhone}
+			</if>
+			<if test="instalDate !=null">
+				,#{instalDate}
+			</if>
+			<if test="expirationDate !=null">
+				,#{expirationDate}
+			</if>
+			<if test="elibId !=null">
+				,#{elibId}
+			</if>
+		</trim>
+		)
+		
+	</insert>
+	
+	<update id="updateEquipById" parameterType="com.zeei.mcs.vo.Equip">
+	    UPDATE T_BAS_EQUIP
+	      SET 
+		      equipname = #{equipName},
+		      equipcode=#{equipCode},
+		      etypecode=#{etypeCode},
+		      instaldate=#{instalDate,jdbcType    = DATE}
+		      expirationdate = #{expirationDate,jdbcType    = INTEGER},
+		      elibid=#{elibId}
+	     WHERE eid = #{eid}
+	</update>
+	
+	<delete id="deleteEquipById" parameterType="java.lang.Integer">
+		DELETE FROM T_BAS_EQUIP WHERE eid = #{eid}
+	</delete>
+	
+	<delete id="deleteEquipByPointCode" parameterType="java.lang.Integer">
+		DELETE FROM T_BAS_EQUIP WHERE pointcode = #{pointCode}
+	</delete>
+	
+</mapper>

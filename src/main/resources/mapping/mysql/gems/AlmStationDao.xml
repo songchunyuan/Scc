@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zeei.mcs.dao.AlmStationDao">
+
+	<delete id="deleteByAlarmCode" parameterType="java.lang.Integer">
+		DELETE FROM T_BAS_ALM_STATION
+		WHERE ALARMCODE=#{alarmCode}
+	</delete>
+	
+	<insert id="insertAlmStations">
+		INSERT INTO T_BAS_ALM_STATION(ALARMCODE,POINTCODE)
+		VALUES
+		<foreach collection="list" separator="," item="almStation">
+			(#{almStation.alarmCode},#{almStation.pointCode})
+		</foreach>
+	</insert>
+	
+</mapper>

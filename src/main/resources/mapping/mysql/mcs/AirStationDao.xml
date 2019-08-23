@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zeei.mcs.dao.AirStationDao">
+	
+	<select id="queryMaxId" resultType="java.lang.Integer">
+		SELECT 
+ 		 MAX(maxid) 
+		FROM
+ 	 	(
+	 	 	SELECT MAX(POINTCODE) maxid  FROM T_PS_BAS_POINTLIST 
+	  		UNION
+	  		SELECT MAX(POINTCODE) maxid  FROM T_ENV_MONI_AIR_STATION
+  		) t 
+	</select>
+	
+	<insert id="insertAirStation" parameterType="com.zeei.mcs.vo.AirStationVO"  >
+		INSERT INTO T_ENV_MONI_AIR_STATION(CREATETIME,POINTCODE
+		<trim>  
+			<if test="stationCode !=null">
+		   		,STATIONCODE         
+		    </if>
+		    <if test="stdPointCode !=null and stdPointCode != ''">
+		  	 ,STDPOINTCODE  
+		   </if>
+		   <if test="pointName !=null and pointName != ''">  
+		   ,pointname   
+		  </if>
+		   <if test="pointAddress !=null and pointAddress != ''">         
+		   ,POINTADDRESS     
+		   </if>
+		   <if test="gasAreaCode !=null and gasAreaCode != ''">         
+		   ,GASAREACODE     
+		   </if>
+		   <if test="regionCode !=null and regionCode != ''">         
+		   ,REGIONCODE     
+		   </if>
+		   <if test="reportLevelCode !=null and reportLevelCode != ''">         
+		   ,REPORTLEVELCODE     
+		   </if>
+		   <if test="airLevelCode !=null and airLevelCode != ''">         
+		   ,AIRLEVELCODE     
+		   </if>
+		   <if test="preciPitationLevelCode !=null and preciPitationLevelCode != ''">         
+		   ,PRECIPITATIONLEVELCODE     
+		   </if>
+		   <if test="so2LevelCode !=null and so2LevelCode != ''">         
+		   ,SO2LEVELCODE     
+		   </if>
+		   <if test="acidLevelCode !=null and acidLevelCode != ''">         
+		   ,ACIDLEVELCODE     
+		   </if>
+		   <if test="longitude !=null ">  
+		   ,LONGITUDE        
+		   </if>
+		   <if test="latitude !=null ">   
+		   ,LATITUDE          
+		   </if>
+		   <if test="pointCodeType !=null ">  
+		   ,POINTCODETYPE     
+		   </if>
+		   <if test="orderNum !=null ">  
+		   ,ORDERNUM     
+		   </if>
+		   <if test="miCycleTime !=null ">  
+		   ,MICYCLETIME     
+		   </if>
+		   <if test="rtCytleTime !=null ">  
+		   ,RTCYTLETIME     
+		   </if>
+		   <if test="isSupplement !=null ">  
+		   ,ISSUPPLEMENT     
+		   </if>
+		   <if test="stationType !=null ">  
+		   ,STATIONTYPE     
+		   </if>
+		   <if test="status !=null ">  
+		   ,STATUS     
+		   </if>
+		   <if test="scode !=null ">  
+		   ,SCODE     
+		   </if>
+		   <if test="hasVideo !=null ">  
+		   ,HASVIDEO     
+		   </if>
+		   <if test="controllevel !=null and controllevel !=''">  
+		   ,CONTROLLEVEL     
+		   </if>
+		   <if test="buildDept !=null and buildDept !=''">  
+		   ,BUILDDEPT     
+		   </if>
+		   <if test="communication !=null and communication !=''">  
+		   ,COMMUNICATION     
+		   </if>
+		   <if test="cardNumber !=null and cardNumber !=''">  
+		   ,CARDNUMBER     
+		   </if>
+		   <if test="ipgp !=null and ipgp !=''">  
+		   ,IPGP     
+		   </if>
+		   <if test="picCodeList !=null and picCodeList !=''">  
+		   ,PICCODELIST     
+		   </if>
+		   <if test="pointFirstLetter !=null and pointFirstLetter !=''">  
+		   ,POINTFIRSTLETTER     
+		   </if>
+		 	<if test="linkman !=null and linkman != ''">  
+		   ,LINKMAN          
+		   </if>
+		  <if test="officePhone !=null and officePhone != ''">  
+		   ,OFFICEPHONE      
+		   </if>
+		  <if test="description !=null and description != ''">  
+		   ,DESCRIPTION       
+		   </if>
+		</trim>
+		)
+		VALUES(NOW(),#{pointCode}
+		<trim>  
+			<if test="stationCode !=null">
+		   	,#{stationCode}         
+		    </if>
+		    <if test="stdPointCode !=null and stdPointCode != ''">
+		  	 ,#{stdPointCode}  
+		   </if>
+		   <if test="pointName !=null and pointName != ''">  
+		   ,#{pointName}   
+		  </if>
+		   <if test="pointAddress !=null and pointAddress != ''">         
+		   ,#{pointAddress}     
+		   </if>
+		   <if test="gasAreaCode !=null and gasAreaCode != ''">         
+		   ,#{gasAreaCode}     
+		   </if>
+		   <if test="regionCode !=null and regionCode != ''">         
+		   ,#{regionCode}       
+		   </if>
+		   <if test="reportLevelCode !=null and reportLevelCode != ''">         
+		   ,#{reportLevelCode}     
+		   </if>
+		   <if test="airLevelCode !=null and airLevelCode != ''">         
+		   ,#{airLevelCode}     
+		   </if>
+		   <if test="preciPitationLevelCode !=null and preciPitationLevelCode != ''">         
+		   ,#{preciPitationLevelCode}     
+		   </if>
+		   <if test="so2LevelCode !=null and so2LevelCode != ''">         
+		   ,#{so2LevelCode}     
+		   </if>
+		   <if test="acidLevelCode !=null and acidLevelCode != ''">         
+		   ,#{acidLevelCode}     
+		   </if>
+		   <if test="longitude !=null ">  
+		   ,#{longitude}        
+		   </if>
+		   <if test="latitude !=null ">   
+		   ,#{latitude}          
+		   </if>
+		   <if test="pointCodeType !=null ">  
+		   ,#{pointCodeType}     
+		   </if>
+		   <if test="orderNum !=null ">  
+		   ,#{orderNum}     
+		   </if>
+		   <if test="miCycleTime !=null ">  
+		   ,#{miCycleTime}     
+		   </if>
+		   <if test="rtCytleTime !=null ">  
+		   ,#{rtCytleTime}     
+		   </if>
+		   <if test="isSupplement !=null ">  
+		   ,#{isSupplement}     
+		   </if>
+		   <if test="stationType !=null ">  
+		   ,#{stationType}     
+		   </if>
+		   <if test="status !=null ">  
+		   ,#{status}     
+		   </if>
+		   <if test="scode !=null ">  
+		   ,#{scode}     
+		   </if>
+		   <if test="hasVideo !=null ">  
+		   ,#{hasVideo}     
+		   </if>
+		   <if test="controllevel !=null and controllevel !=''">  
+		   ,#{controllevel}     
+		   </if>
+		   <if test="buildDept !=null and buildDept !=''">  
+		   ,#{buildDept}     
+		   </if>
+		   <if test="communication !=null and communication !=''">  
+		   ,#{communication}     
+		   </if>
+		   <if test="cardNumber !=null and cardNumber !=''">  
+		   ,#{cardNumber}     
+		   </if>
+		   <if test="ipgp !=null and ipgp !=''">  
+		   ,#{ipgp}     
+		   </if>
+		   <if test="picCodeList !=null and picCodeList !=''">  
+		   ,#{picCodeList}     
+		   </if>
+		   <if test="pointFirstLetter !=null and pointFirstLetter !=''">  
+		   ,#{pointFirstLetter}     
+		   </if>
+		   <if test="linkman !=null and linkman != ''">  
+		   ,#{linkman}          
+		   </if>
+		  <if test="officePhone !=null and officePhone != ''">  
+		   ,#{officePhone}      
+		   </if>
+		  <if test="description !=null and description != ''">  
+		   ,#{description}       
+		   </if>
+		</trim>
+		)
+	</insert>
+	
+	<update id="updateAirStationPointById" parameterType="com.zeei.mcs.vo.AirStationVO">
+	    UPDATE T_ENV_MONI_AIR_STATION
+	    SET 
+	    	POINTNAME=#{pointName,jdbcType    = VARCHAR},
+	    	IPGP=#{ipgp,jdbcType    = VARCHAR},
+	    	STDPOINTCODE=#{stdPointCode,jdbcType    = VARCHAR},
+	    	REGIONCODE=#{regionCode,jdbcType    = VARCHAR},
+	    	controllevel=#{controllevel,jdbcType    = VARCHAR},
+	    	builddept=#{buildDept,jdbcType    = VARCHAR},
+	    	linkman=#{linkman,jdbcType    = VARCHAR},
+	    	officephone=#{officePhone,jdbcType    = VARCHAR},
+	    	POINTADDRESS=#{pointAddress,jdbcType    = VARCHAR},
+	    	longitude=#{longitude,jdbcType    = DOUBLE},
+	    	latitude=#{latitude,jdbcType    = DOUBLE},
+	    	communication=#{communication,jdbcType    = VARCHAR},
+	    	cardnumber=#{cardNumber,jdbcType    = VARCHAR},
+	    	ISSUPPLEMENT=#{isSupplement,jdbcType    = INTEGER},
+	    	HASVIDEO=#{hasVideo,jdbcType    = INTEGER},
+	    	rtcytletime=#{rtCytleTime,jdbcType    = INTEGER},
+	    	micycletime=#{miCycleTime,jdbcType    = INTEGER},
+	    	scode=#{scode,jdbcType    = INTEGER},
+	    	ordernum=#{orderNum,jdbcType    = INTEGER},
+	    	description=#{description,jdbcType    = VARCHAR},
+	    	pointfirstletter=#{pointFirstLetter,jdbcType    = VARCHAR},
+	    	piccodelist=#{picCodeList,jdbcType    = VARCHAR}
+	     WHERE pointcode = #{pointCode}
+	</update>
+	
+	<select id="queryPointByCondition" parameterType="java.util.Map" resultType="com.zeei.mcs.vo.AirStationVO">	
+		SELECT 
+		  a.POINTCODE,
+		  a.STATIONCODE,
+		  a.STDPOINTCODE,
+		  a.POINTNAME,
+		  a.POINTADDRESS,
+		  a.GASAREACODE,
+		  a.ATRRIBUTECODE,
+		  a.REGIONCODE,
+		  a.REPORTLEVELCODE,
+		  a.AIRLEVELCODE,
+		  a.PRECIPITATIONLEVELCODE,
+		  a.SO2LEVELCODE,
+		  a.ACIDLEVELCODE,
+		  a.LONGITUDE,
+		  a.LATITUDE,
+		  a.HEIGHT,
+		  a.POINTCODETYPE,
+		  a.CREATETIME,
+		  a.ORDERNUM,
+		  a.MICYCLETIME,
+		  a.RTCYTLETIME,
+		  a.ISSUPPLEMENT,
+		  a.STATIONTYPE,
+		  a.STATUS,
+		  a.SCODE,
+		  a.HASVIDEO,
+		  a.CONTROLLEVEL,
+		  a.BUILDDEPT,
+		  a.COMMUNICATION,
+		  a.CARDNUMBER,
+		  a.IPGP,
+		  a.PICCODELIST,
+		  a.POINTFIRSTLETTER,
+		  a.LINKMAN,
+		  a.OFFICEPHONE,
+		  a.DESCRIPTION,
+		  ar.regionname AS regionName,
+		  ge.categoryname AS controllevelName,
+		  ge2.categoryname AS communicationName,
+		  p.sname 
+		FROM
+		  T_ENV_MONI_AIR_STATION a 
+		  LEFT JOIN T_DIC_AREACODE ar 
+		    ON ar.code_region = a.regioncode 
+		  LEFT JOIN T_DIC_GENERALCATEGORY ge 
+		    ON ge.generalcode = a.CONTROLLEVEL 
+		  LEFT JOIN T_DIC_GENERALCATEGORY ge2 
+		    ON ge2.generalcode = a.communication
+		  LEFT JOIN T_DIC_POLLSTD p
+		    ON  p.SCODE=a.SCODE	   
+		WHERE a.status!=-1
+	  	<if test="pointName !=null and pointName !=''">AND a.pointname like CONCAT('%',#{pointName},'%')</if>
+	  	<if test="areaCodeList!=null and areaCodeList.size()>0">
+	  		AND a.regioncode in
+	  		<foreach collection="areaCodeList" open="(" separator="," index="index" item="areaCode" close=")">
+	  			#{areaCode.code}
+	  		</foreach>
+	  	</if>
+	  	<if test="pointCode !=null">
+        	AND a.pointcode=#{pointCode}
+        </if>
+		ORDER BY a.ordernum DESC,a.pointcode DESC
+	</select>
+	
+</mapper>

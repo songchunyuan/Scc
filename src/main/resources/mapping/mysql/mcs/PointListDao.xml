@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zeei.mcs.dao.PointListDao">
+	
+	<select id="queryPointByCondition" parameterType="java.util.Map" resultType="com.zeei.mcs.vo.PointList">	
+		SELECT 
+			p.pointcode AS pointCode,
+			ar.regionname AS regionName,	
+			p.pointname AS pointName,
+			e.entername AS enterName,
+			p.psaddress AS psAddress,
+			p.pscode         AS pscode,           
+			p.stdpointcode   AS stdPointCode,           
+			p.systemtype     AS systemType,           
+			p.pointposition  AS pointPosition,           
+			p.longitude      AS longitude,           
+			p.latitude       AS latitude,           
+			p.isautomonitor  AS isAutoMonitor,           
+			p.indicate       AS indicate,           
+			p.controllevel   AS controllevel,           
+			p.valleycode     AS valleyCode,           
+			p.regioncode     AS regionCode,           
+			p.areacode       AS areaCode,           
+			p.micycletime    AS miCycleTime,           
+			p.rtcytletime    AS rtCytleTime,           
+			p.linkman        AS linkman,           
+			p.officephone    AS officePhone,           
+			p.psaddress      AS psAddress,           
+			p.description    AS description,
+			p.ipgp,
+			p.builddept,        
+			p.communication,
+			p.cardnumber,
+			p.issupportmod,
+			p.isinstallvideo,
+			p.scode,
+			p.ordernum,
+			p.piccodelist,
+			ge.categoryname AS controllevelName,
+		    ge2.categoryname AS systemTypeName,
+		    ge3.categoryname AS communicationName
+		FROM
+			T_PS_BAS_POINTLIST p
+			LEFT JOIN T_DIC_AREACODE ar 
+		      ON ar.code_region = p.areacode
+			JOIN T_PS_BAS_ENTERLIST e 
+		      ON e.pscode = p.pscode 
+		   LEFT JOIN T_DIC_GENERALCATEGORY ge 
+			 ON ge.generalcode = p.CONTROLLEVEL
+		   LEFT JOIN T_DIC_GENERALCATEGORY ge2 
+			 ON ge2.generalcode =p.SYSTEMTYPE
+		   LEFT JOIN T_DIC_GENERALCATEGORY ge3
+			 ON ge3.generalcode =p.communication   
+		 WHERE p.status!=-1
+	  	<if test="pointName!=null and pointName!=''">AND p.pointname like CONCAT('%',#{pointName},'%')</if>
+	  	<if test="areaCodeList!=null and areaCodeList.size()>0">
+	  		AND p.areacode in
+	  		<foreach collection="areaCodeList" open="(" separator="," index="index" item="areaCode" close=")">
+	  			#{areaCode.code}
+	  		</foreach>
+	  	</if>
+	  	<if test="pointCode !=null">
+        	AND p.pointcode=#{pointCode}
+        </if>
+		ORDER BY p.ordernum DESC,p.pointcode DESC
+	</select>
+	
+	<select id="queryPointList" parameterType="com.zeei.mcs.vo.PointList" resultType="com.zeei.mcs.vo.PointList">	
+		SELECT 
+			p.pointcode AS pointCode,
+			p.pointname AS pointName,
+			p.stdpointcode AS stdPointCode
+		FROM
+			T_PS_BAS_POINTLIST p
+		 WHERE p.status!=-1	
+        <if test="pointCode !=null">
+        	AND pointcode=#{pointCode}
+        </if>
+        <if test="pointName !=null and pointName != ''">
+			AND pointname =#{pointName}
+		</if>			
+		<if test="stdPointCode !=null and stdPointCode != ''">
+			AND stdpointcode=#{stdPointCode}
+		</if>
+		ORDER BY p.ordernum DESC,p.pointcode DESC
+	</select>
+	
+	<select id="queryMaxId" resultType="Integer">
+		SELECT 
+ 		 MAX(maxid) 
+		FROM
+ 	 	(
+	 	 	SELECT MAX(POINTCODE) maxid  FROM T_PS_BAS_POINTLIST 
+	  		UNION
+	  		SELECT MAX(POINTCODE) maxid  FROM T_ENV_MONI_AIR_STATION
+  		) t 
+		
+	</select>
+	
+	<insert id="insertPointList" parameterType="com.zeei.mcs.vo.PointList"  >
+		INSERT INTO T_PS_BAS_POINTLIST(CREATETIME,POINTCODE
+		<trim>  
+			<if test="pscode !=null">
+		   		,pscode         
+		    </if>
+		    <if test="stdPointCode !=null and stdPointCode != ''">
+		  	 ,STDPOINTCODE  
+		   </if>
+		   <if test="pointName !=null and pointName != ''">  
+		   ,pointname   
+		  </if>
+		   <if test="systemType !=null">    
+		   ,SYSTEMTYPE 
+		   		   </if>
+		   <if test="pointPosition !=null and pointPosition != ''">         
+		   ,POINTPOSITION     
+		   </if>
+		   <if test="longitude !=null ">  
+		   ,LONGITUDE        
+		   </if>
+		   <if test="latitude !=null ">   
+		   ,LATITUDE          
+		   </if>
+		   <if test="isAutoMonitor !=null ">  
+		   ,ISAUTOMONITOR     
+		   </if>
+		   <if test="indicate !=null and indicate != ''">  
+		   ,INDICATE          
+		   </if>
+		   <if test="status !=null ">  
+		   ,STATUS            
+		   </if>
+		   <if test="controllevel !=null and controllevel != ''">  
+		   ,CONTROLLEVEL      
+		   </if>
+		   <if test="valleyCode !=null and valleyCode != ''">  
+		   ,VALLEYCODE        
+		   </if>
+		   <if test="regionCode !=null and regionCode != ''">  
+		   ,REGIONCODE        
+		   </if>
+		   <if test="areaCode !=null and areaCode != ''">  
+		   ,AREACODE          
+		   </if>
+		   <if test="miCycleTime !=null ">  
+		   ,MICYCLETIME       
+		   </if>
+		   <if test="rtCytleTime !=null ">  
+		   ,RTCYTLETIME       
+		   </if>
+		   <if test="linkman !=null and linkman != ''">  
+		   ,LINKMAN           
+		   </if>
+		   <if test="officePhone !=null and officePhone != ''">  
+		   ,OFFICEPHONE       
+		   </if>
+		   <if test="psAddress !=null and psAddress != ''">  
+		   ,PSADDRESS         
+		   </if>
+		   <if test="fax !=null and fax != ''">  
+		   ,FAX               
+		   </if>
+		   <if test="email !=null and email != ''">  
+		   ,EMAIL             
+		   </if>
+		   <if test="description !=null and description != ''">  
+		   ,DESCRIPTION       
+		   </if>
+		   <if test="datasourceCode !=null and datasourceCode != ''">  
+		   ,DATASOURCE_CODE   
+		   </if>
+		   <if test="ipgp !=null and ipgp != ''">  
+		   ,IPGP   
+		   </if>
+		   <if test="buildDept !=null and buildDept != ''">  
+		   ,BUILDDEPT   
+		   </if>
+		   <if test="communication !=null and communication != ''">  
+		   ,COMMUNICATION   
+		   </if>
+		   <if test="cardNumber !=null and cardNumber != ''">  
+		   ,CARDNUMBER   
+		   </if>
+		   <if test="isSupportMod !=null">  
+		   ,ISSUPPORTMOD   
+		   </if>
+		   <if test="isInstallVideo !=null">  
+		   ,ISINSTALLVIDEO   
+		   </if>
+		   <if test="scode !=null">  
+		   ,SCODE   
+		   </if>
+		   <if test="orderNum !=null">  
+		   ,ORDERNUM   
+		   </if>
+		   <if test="picCodeList !=null and picCodeList !=''">  
+		   ,PICCODELIST   
+		   </if>
+		</trim>
+		)
+		VALUES(NOW(),#{pointCode}
+		<trim> 
+			<if test="pscode !=null">
+		   		,#{pscode}         
+		    </if>
+		    <if test="stdPointCode !=null and stdPointCode != ''">
+		  	 ,#{stdPointCode}  
+		   </if>
+		   <if test="pointName !=null and pointName != ''">  
+		   ,#{pointName}   
+		  </if>
+		   <if test="systemType !=null">    
+		   ,#{systemType} 
+		   </if>
+		   <if test="pointPosition !=null and pointPosition != ''">         
+		   ,#{pointPosition}     
+		   </if>
+		   <if test="longitude !=null ">  
+		   ,#{longitude}        
+		   </if>
+		   <if test="latitude !=null ">   
+		   ,#{latitude}          
+		   </if>
+		   <if test="isAutoMonitor !=null ">  
+		   ,#{isAutoMonitor}     
+		   </if>
+		   <if test="indicate !=null and indicate != ''">  
+		   ,#{indicate}          
+		   </if>
+		   <if test="status !=null ">  
+		   ,#{status}            
+		   </if>
+		   <if test="controllevel !=null and controllevel != ''">  
+		   ,#{controllevel}      
+		   </if>
+		   <if test="valleyCode !=null and valleyCode != ''">  
+		   ,#{valleyCode}        
+		   </if>
+		   <if test="regionCode !=null and regionCode != ''">  
+		   ,#{regionCode}        
+		   </if>
+		   <if test="areaCode !=null and areaCode != ''">  
+		   ,#{areaCode}          
+		   </if>
+		   <if test="miCycleTime !=null ">  
+		   ,#{miCycleTime}       
+		   </if>
+		   <if test="rtCytleTime !=null ">  
+		   ,#{rtCytleTime}       
+		   </if>
+		   <if test="linkman !=null and linkman != ''">  
+		   ,#{linkman}           
+		   </if>
+		   <if test="officePhone !=null and officePhone != ''">  
+		   ,#{officePhone}       
+		   </if>
+		   <if test="psAddress !=null and psAddress != ''">  
+		   ,#{psAddress}         
+		   </if>
+		   <if test="fax !=null and fax != ''">  
+		   ,#{fax}               
+		   </if>
+		   <if test="email !=null and email != ''">  
+		   ,#{email}             
+		   </if>
+		   <if test="description !=null and description != ''">  
+		   ,#{description}       
+		   </if>
+		   <if test="datasourceCode !=null and datasourceCode != ''">  
+		   ,#{datasourceCode}   
+		   </if>
+		   <if test="ipgp !=null and ipgp != ''">  
+		   ,#{ipgp}   
+		   </if>
+		  <if test="buildDept !=null and buildDept != ''">  
+		   ,#{buildDept}   
+		   </if>
+		  <if test="communication !=null and communication != ''">  
+		   ,#{communication}   
+		   </if>
+		   <if test="cardNumber !=null and cardNumber != ''">  
+		   ,#{cardNumber}   
+		   </if>
+		  <if test="isSupportMod !=null">  
+		   ,#{isSupportMod}   
+		   </if>
+		   <if test="isInstallVideo !=null">  
+		   ,#{isInstallVideo}   
+		   </if>
+		   <if test="scode !=null">  
+		   ,#{scode}   
+		   </if>
+		  <if test="orderNum !=null">  
+		   ,#{orderNum}   
+		   </if>
+		  <if test="picCodeList !=null and picCodeList !=''">  
+		   ,#{picCodeList}   
+		   </if>
+		</trim>
+		)
+	</insert>
+	
+	<update id="updatePointListById" parameterType="com.zeei.mcs.vo.PointList">
+	    UPDATE T_PS_BAS_POINTLIST
+	    SET 
+	    	pointname=#{pointName,jdbcType    = VARCHAR},
+	    	ipgp=#{ipgp,jdbcType    = VARCHAR},
+	    	stdpointcode=#{stdPointCode,jdbcType    = VARCHAR},
+	    	pscode=#{pscode,jdbcType    = INTEGER},
+	    	areacode=#{areaCode,jdbcType    = VARCHAR},
+	    	regioncode=#{regionCode,jdbcType    = VARCHAR},
+	    	systemtype=#{systemType,jdbcType=INTEGER},
+	    	controllevel=#{controllevel,jdbcType    = VARCHAR},
+	    	builddept=#{buildDept,jdbcType    = VARCHAR},
+	    	linkman=#{linkman,jdbcType    = VARCHAR},
+	    	officephone=#{officePhone,jdbcType    = VARCHAR},
+	    	pointposition=#{pointPosition,jdbcType    = VARCHAR},
+	    	longitude=#{longitude,jdbcType    = DOUBLE},
+	    	latitude=#{latitude,jdbcType    = DOUBLE},
+	    	communication=#{communication,jdbcType    = VARCHAR},
+	    	cardnumber=#{cardNumber,jdbcType    = VARCHAR},
+	    	issupportmod=#{isSupportMod,jdbcType    = INTEGER},
+	    	isinstallvideo=#{isInstallVideo,jdbcType    = INTEGER},
+	    	rtcytletime=#{rtCytleTime,jdbcType    = INTEGER},
+	    	micycletime=#{miCycleTime,jdbcType    = INTEGER},
+	    	scode=#{scode,jdbcType    = INTEGER},
+	    	ordernum=#{orderNum,jdbcType    = INTEGER},
+	    	description=#{description,jdbcType    = VARCHAR},
+	    	pointfirstletter=#{pointFirstLetter,jdbcType    = VARCHAR},
+	    	piccodelist=#{picCodeList,jdbcType    = VARCHAR}
+	     WHERE pointcode = #{pointCode}
+	</update>
+	
+	<update id="deletePointByIds">
+		UPDATE T_PS_BAS_POINTLIST
+		SET 
+			status=0,
+			updatetime=NOW()
+		WHERE pointcode IN
+		<foreach collection="list" separator="," item="id" open="(" close=")">
+			#{id} 
+		</foreach>
+	</update>
+	
+	<update id="removeRelationByEids">
+		UPDATE T_PS_BAS_POINTLIST
+		SET 
+			pscode=-1,
+			updatetime=NOW()
+		WHERE pscode IN
+		<foreach collection="list" separator="," item="id" open="(" close=")">
+			#{id} 
+		</foreach>
+	</update>
+	
+	<update id="removeRelationByPointcode">
+		UPDATE T_PS_BAS_POINTLIST
+		SET 
+			pscode=-1,
+			updatetime=NOW()
+		WHERE pointcode IN
+		<foreach collection="list" separator="," item="id" open="(" close=")">
+			#{id} 
+		</foreach>
+	</update>
+</mapper>

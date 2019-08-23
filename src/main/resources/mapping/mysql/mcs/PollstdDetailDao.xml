@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zeei.mcs.dao.PollStdDetailDao">
+	
+	<insert id="insertPollstdDetail" parameterType="com.zeei.mcs.vo.PollStdDetailVO"  >
+		INSERT INTO T_DIC_POLLSTD_DETAIL(scode
+	        <if test="polluteCode !=null and polluteCode  != ''">
+				,pollutecode
+			</if>			
+			<if test="ttype !=null and ttype  != ''">
+				,ttype
+			</if>
+			<if test="smaxValue !=null">
+				,smaxvalue
+			</if>
+			<if test="sminValue !=null ">
+				,sminvalue
+			</if>
+			<if test="sunit !=null and sunit !=''">
+				,sunit
+			</if>
+		)
+		VALUES(#{scode}
+			 <if test="polluteCode !=null and polluteCode  != ''">
+				,#{polluteCode}
+			</if>			
+			<if test="ttype !=null and ttype  != ''">
+				,#{ttype}
+			</if>
+			<if test="smaxValue !=null">
+				,#{smaxValue}
+			</if>
+			<if test="sminValue !=null ">
+				,#{sminValue}
+			</if>
+			<if test="sunit !=null and sunit !=''">
+				,#{sunit}
+			</if>
+		)
+	</insert>
+	
+	<select id="queryPollStdDetail" parameterType="com.zeei.mcs.vo.PollStdDetailVO" resultType="com.zeei.mcs.vo.PollStdDetailVO">
+		SELECT 
+		  scode,
+		  pollutecode,
+		  ttype,
+		  smaxvalue,
+		  sminvalue,
+		  sunit 
+		FROM
+		  T_DIC_POLLSTD_DETAIL
+	  	<where>
+	  		<if test="scode !=null">AND scode=#{scode}</if>
+	  	</where>
+	</select>
+	
+	
+	<delete id="deletePollstdDetailByScodes">
+		DELETE FROM T_DIC_POLLSTD_DETAIL
+		WHERE scode IN
+		<foreach collection="list" open="(" separator="," close=")" item="scode">
+			#{scode}
+		</foreach>
+	</delete>
+	
+	
+	
+</mapper>

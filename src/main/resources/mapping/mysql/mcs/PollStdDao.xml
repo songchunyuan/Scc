@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zeei.mcs.dao.PollStdDao">
+	
+	<select id="queryPollStd" parameterType="com.zeei.mcs.vo.PollStdVO" resultType="com.zeei.mcs.vo.PollStdVO">
+		SELECT 
+		  p.scode,
+		  p.sname,
+		  p.systemtype,
+		  p.trade,
+		  p.remark
+		FROM   
+			T_DIC_POLLSTD p
+		<where>
+			<if test="systemType !=null">
+				AND p.systemtype=#{systemType}
+			</if>
+			<if test="sname !=null and sname !=''">
+				AND p.sname=#{sname}
+			</if>	
+			<if test="scode !=null ">
+				AND p.scode=#{scode}
+			</if>	
+		</where>
+	</select>
+	
+	<select id="querySystemPollStdByCondition" parameterType="java.util.Map" resultType="com.zeei.mcs.vo.PollStdVO">
+		SELECT 
+		  p.scode,
+		  p.sname,
+		  p.systemtype,
+		  p.trade,
+		  p.remark,
+		  (SELECT  GROUP_CONCAT(v.pointName) FROM V_BAS_POINTSITE_INFO v WHERE v.scode=p.scode AND v.systemtype = #{systemType} ) AS pointNames 
+		FROM
+			T_DIC_POLLSTD p
+		WHERE p.systemtype=#{systemType}	
+	     <if test="searchPollStdName !=null and searchPollStdName !=''">
+	     	AND p.SNAME LIKE CONCAT('%',#{searchPollStdName},'%')
+	     </if>
+	    ORDER BY p.scode DESC
+	</select>
+	
+	<insert id="insertPollStd" parameterType="com.zeei.mcs.vo.PollStdVO"  >
+		INSERT INTO T_DIC_POLLSTD(scode
+	        <if test="sname !=null and sname  != ''">
+				,sname
+			</if>			
+			<if test="systemType !=null ">
+				,systemtype
+			</if>
+			<if test="trade !=null and trade  != ''">
+				,trade
+			</if>
+			<if test="remark !=null and remark != ''">
+				,remark
+			</if>
+		)
+		VALUES(#{scode}
+			<if test="sname !=null and sname  != ''">
+				,#{sname}
+			</if>			
+			<if test="systemType !=null ">
+				,#{systemType}
+			</if>
+			<if test="trade !=null and trade  != ''">
+				,#{trade}
+			</if>
+			<if test="remark !=null and remark != ''">
+				,#{remark}
+			</if>
+		)
+	</insert>
+	
+	<update id="updatePollStdById" parameterType="com.zeei.mcs.vo.PollStdVO">
+	    UPDATE T_DIC_POLLSTD
+	      SET sname    = #{sname,jdbcType    = VARCHAR},
+	           remark     = #{remark, jdbcType    = VARCHAR}
+	     WHERE scode = #{scode}
+	</update>
+	
+	<delete id="deletePollStdByIds">
+		DELETE FROM T_DIC_POLLSTD
+		WHERE scode IN
+		<foreach collection="list" separator="," item="scode" open="(" close=")">
+			#{scode} 
+		</foreach>
+	</delete>
+	
+	<select id="queryMaxId"  resultType="java.lang.Integer">
+		SELECT MAX(scode) FROM T_DIC_POLLSTD
+	</select>
+	
+</mapper>

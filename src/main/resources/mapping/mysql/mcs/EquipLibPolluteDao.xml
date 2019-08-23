@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zeei.mcs.dao.EquipLibPolluteDao" >
+  <resultMap id="BaseResultMap" type="com.zeei.mcs.vo.EquipLibPolluteVO" >
+    <id column="EQUIPCODE" property="equipCode" jdbcType="VARCHAR" />
+    <id column="POLLUTECODE" property="polluteCode" jdbcType="VARCHAR" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="com.zeei.mcs.vo.EquipLibPolluteVO" >
+    DELETE FROM T_BAS_EQUIPLIBPOLLUTE
+    WHERE EQUIPCODE = #{equipCode,jdbcType=VARCHAR}
+  </delete>
+  
+  <insert id="insertByPrimaryKey" parameterType="com.zeei.mcs.vo.EquipLibPolluteVO" >
+    INSERT INTO T_BAS_EQUIPLIBPOLLUTE (EQUIPCODE, POLLUTECODE)
+    VALUES (#{equipCode,jdbcType=VARCHAR}, #{polluteCode,jdbcType=VARCHAR})
+  </insert>
+
+<select id="queryByPrimaryList" parameterType="java.util.Map" resultType="com.zeei.mcs.vo.EquipLibPolluteVO">
+		SELECT
+			EQUIPCODE,
+			POLLUTECODE
+				FROM
+			T_BAS_EQUIPLIBPOLLUTE
+		<where>
+		    <if test="equipCode != null and equipCode != ''">AND equipCode = #{equipCode,jdbcType=VARCHAR}</if>
+		    <if test="elibIdList !=null and elibIdList.size()>0">
+		    	AND EQUIPCODE IN
+		    	<foreach collection="elibIdList" open="(" separator="," close=")" item="elibId">
+		    		#{elibId}
+		    	</foreach>
+		    </if>
+		    <if test="polluteCodeList !=null and polluteCodeList.size()>0">
+		    	AND pollutecode IN
+		    	<foreach collection="polluteCodeList" open="(" separator="," close=")" item="polluteCode">
+		    		#{polluteCode}
+		    	</foreach>
+		    </if>
+		</where>
+</select>
+
+<select id="queryByPrimaryStandList" parameterType="java.util.Map" resultType="com.zeei.mcs.vo.StandPolluteVO">
+		SELECT
+			s.CODECLASS,
+			g.CATEGORYNAME codeClassName,
+			s.POLLUTENAME,
+			s.POLLUTECODE,
+			s.NUMPRECISION,
+			s.POLLCONCUNIT
+		FROM
+			T_BAS_EQUIPLIBPOLLUTE e
+		JOIN T_DIC_STDPOLLCODE s ON e.POLLUTECODE = s.POLLUTECODE
+		LEFT JOIN T_DIC_GENERALCATEGORY g ON s.CODECLASS = g.GENERALCODE
+		AND g.CATEGORYCLASS = 'CODECLASS'
+		<where>
+		    <if test="eid != null">e.equipCode = #{eid}</if>
+		</where>
+			ORDER BY s.orderNum DESC
+</select>
+</mapper>

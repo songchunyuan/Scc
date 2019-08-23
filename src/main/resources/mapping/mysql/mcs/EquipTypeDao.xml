@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zeei.mcs.dao.EquipTypeDao">
+	
+	<select id="queryEquipTypeByCondition" parameterType="java.util.Map" resultType="com.zeei.mcs.vo.EquipType">		
+		SELECT 
+		  etypecode,
+		  etypename,
+		  etype,
+		  manufacturer,
+		  contact,
+		  contactphone,
+		  ordernum 
+		FROM
+		  T_BAS_EQUIPTYPE 
+		  <where>
+		  	<if test="equipTypeName!=null and equipTypeName!=''">AND etypename like CONCAT('%',#{equipTypeName},'%')</if>
+		  	<if test="etypeCode !=null and etypeCode !=''">AND etypecode = #{etypeCode}</if>
+		  </where>
+		ORDER BY ordernum DESC,etypecode DESC
+	</select>
+	
+</mapper>

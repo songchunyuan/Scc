@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zeei.gems.dao.AlmDefDao">
+
+	<select id="queryAlmDefByCondition" parameterType="java.util.Map" resultType="com.zeei.gems.vo.AlmDefVO">
+		SELECT 
+		  ad.ALARMCODE,
+		  ad.ALMTYPEID,
+		  ad.DESCRIPTION,
+		  ad.SUGGESTION,
+		  ad.SYSTEMTYPE,
+		  ad.EFFECTIVENESS,
+		  ad.ENABLED,
+		  g.CATEGORYNAME AS systemTypeName,
+		  g2.CATEGORYNAME AS effectivenessName,
+		  (SELECT 
+		    GROUP_CONCAT(v.pointName) 
+		  FROM
+		    T_BAS_ALM_STATION s 
+		    JOIN V_BAS_POINTSITE_INFO v 
+		      ON s.pointcode = v.pointcode 
+		  WHERE s.alarmcode = ad.alarmcode) AS pointNames 
+		FROM
+		  T_BAS_ALM_DEF ad 
+		  LEFT JOIN T_DIC_GENERALCATEGORY g 
+		    ON g.generalcode = ad.systemtype 
+		  LEFT JOIN T_DIC_GENERALCATEGORY g2 
+		    ON g2.generalcode = ad.effectiveness 
+		  LEFT JOIN T_BAS_ALM_STATION s
+		    ON s.alarmcode=ad.alarmcode  
+		  LEFT JOIN   T_BAS_ALM_SYSTEMTYPE ast
+		    ON ad.ALARMCODE=ast.ALARMCODE  
+		<where>
+		 	<if test="systemType !=null and systemType !=''">AND ast.SYSTEMTYPE=#{systemType}</if>  
+			<if test="enabled !=null">AND (CASE WHEN ad.ENABLED IS NULL THEN 0 ELSE ad.ENABLED END)=#{enabled}</if>
+			<if test="pointCode !=null and pointCode !=''">AND s.pointcode=#{pointCode}</if>
+		</where>
+		 GROUP BY ad.alarmcode
+		 ORDER BY ad.alarmcode
+	</select>
+	
+	<update id="updateAlmDefById" parameterType="com.zeei.gems.vo.AlmDefVO">
+		UPDATE T_BAS_ALM_DEF
+		SET description=#{description,jdbcType= VARCHAR},
+			effectiveness=#{effectiveness,jdbcType= VARCHAR}
+			<if test="enabled !=null"> ,ENABLED=#{enabled}</if>
+			<if test="systemType !=null and systemType !=''">
+			,systemtype=#{systemType}
+			</if>
+		WHERE alarmcode=#{alarmCode}
+	</update>
+	
+</mapper>

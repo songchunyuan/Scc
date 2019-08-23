@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zeei.mcs.dao.EquipPollcodeDao">
+	
+	<select id="queryEquipPollcodeByCondition" parameterType="java.util.Map" resultType="com.zeei.mcs.vo.StandPolluteVO">	
+		SELECT 
+		  s.pollutecode,
+		  s.pollutename,
+		  s.pollconcunit,
+		  s.numprecision
+		FROM
+		  T_BAS_EQUIPPOLLCODE e
+		  JOIN T_DIC_STDPOLLCODE s
+		    ON  s.pollutecode =e.pollutecode
+		<where>
+			<if test="eidList !=null and eidList.size()>0">
+				AND e.eid IN
+				<foreach collection="eidList" open="(" separator="," close=")" item="eid">
+					#{eid}
+				</foreach>
+			</if>
+			<if test="eid !=null">
+				AND e.eid=#{eid}
+			</if>
+		</where>    
+		ORDER BY e.ordernum, s.ordernum,s.pollutecode 
+	</select>
+
+	<select id="queryEquipPollcode" parameterType="java.util.Map" resultType="com.zeei.mcs.vo.EquipPollcode">	
+		SELECT 
+			eid,			
+			pollutecode,
+			ordernum
+		FROM T_BAS_EQUIPPOLLCODE
+		<where>
+			<if test="eid != null ">AND eid=#{eid}</if>
+		</where>
+		ORDER BY ordernum,pollutecode
+	</select>
+	
+	<insert id="insertEquipPollcodeList">
+		INSERT INTO T_BAS_EQUIPPOLLCODE(eid,pollutecode,ordernum)
+		VALUES
+		<foreach collection="list" separator="," index="index" item="item" >
+			(
+			#{item.eid},
+			#{item.polluteCode},
+			#{item.orderNum,jdbcType=INTEGER}
+			)
+ 		</foreach>
+	</insert>
+	
+	<delete id="deleteEquipPollcode" parameterType="com.zeei.mcs.vo.EquipPollcode">
+		DELETE FROM T_BAS_EQUIPPOLLCODE
+		WHERE eid=#{eid} AND pollutecode=#{polluteCode}
+	</delete>
+	
+	<delete id="deleteEquipPollcodeByEid" parameterType="java.lang.Integer">
+		DELETE FROM T_BAS_EQUIPPOLLCODE
+		WHERE eid=#{eid}
+	</delete>
+	
+	
+</mapper>

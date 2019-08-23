@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zeei.cdq.dao.DataYearDao">
+
+	<select id="dataHistoryStatsList" resultType="com.zeei.cdq.vo.DataHistoryStatsVO">
+		SELECT 
+		  d.pollutecode,
+		  FORMAT(MAX(`maxvalue`), st.numprecision) AS maximumValue,
+		  FORMAT(MIN(`minvalue`), st.numprecision) AS minimumValue,
+		  FORMAT(AVG(`avgvalue`), st.numprecision) AS averageVlaue,
+		  COUNT(*) AS sumValue,
+		  SUM(CASE WHEN d.dataflag!='F' THEN 1 ELSE 0 END ) AS validValue
+		FROM
+			<if test="systemType==22">
+				T_ENV_MONI_AIR_DATASATA d 
+			</if>
+			<if test="systemType==31">
+				T_PS_BAS_GAS_DATASATA d 
+			</if>
+			<if test="systemType==32">
+				T_PS_BAS_WAT_DATASATA d 
+			</if>
+		  JOIN T_DIC_STDPOLLCODE st 
+		    ON st.pollutecode = d.pollutecode 
+		WHERE d.monitortype=1 
+		AND d.pointcode IN
+		<foreach item="pointCode" index="index" collection="pointCodeList"
+			open="(" separator="," close=")">
+			#{pointCode}
+		</foreach>
+		<if test="polluteCodeList != null">
+			AND d.pollutecode IN
+			<foreach item="polluteCode" index="index" collection="polluteCodeList"
+				open="(" separator="," close=")">
+				#{polluteCode}
+			</foreach>
+		</if>
+		AND d.datatime >= #{startTime}
+		AND <![CDATA[ d.datatime <= #{endTime}]]>
+		GROUP BY pollutecode 
+		ORDER BY d.datatime ASC
+	</select>
+
+	<select id="dataYearList" resultType="com.zeei.cdq.vo.DataQueryVO">
+		SELECT
+			A.POINTCODE,
+			B.POINTNAME,
+			SUBSTR(A.DATATIME,1,19) DATATIME,
+			A.POLLUTECODE,
+			B.POLLUTENAME,
+			FORMAT(A.AVGVALUE, B.NUMPRECISION) AS DATAVALUE,
+			C.SUNIT,FORMAT(C.SMINVALUE, B.NUMPRECISION) AS SMINVALUE,FORMAT(C.SMAXVALUE, B.NUMPRECISION) AS SMAXVALUE
+		FROM 
+		<if test="systemType==22">
+			T_ENV_MONI_AIR_DATASATA A
+		</if>
+		<if test="systemType==31">
+			T_PS_BAS_GAS_DATASATA A
+		</if>
+		<if test="systemType==32">
+			T_PS_BAS_WAT_DATASATA A
+		</if>
+		LEFT JOIN V_ENV_STATIONPOLLINFO B 
+		  ON B.POLLUTECODE = A.POLLUTECODE 
+		LEFT JOIN V_BAS_POLLSTD C 
+		  ON C.POINTCODE = A.POINTCODE 
+		  AND C.POLLUTECODE = A.POLLUTECODE 
+		  AND C.SYSTEMTYPE = #{systemType} 
+		WHERE
+		A.MONITORTYPE=1
+		<if test="pointCodeList != null">
+			AND A.POINTCODE IN
+			<foreach item="pointCode" index="index" collection="pointCodeList"
+				open="(" separator="," close=")">
+				#{pointCode}
+			</foreach>
+		</if>
+		<if test="polluteCodeList != null">
+			AND A.POLLUTECODE IN
+			<foreach item="polluteCode" index="index" collection="polluteCodeList"
+				open="(" separator="," close=")">
+				#{polluteCode}
+			</foreach>
+		</if>
+		AND A.DATATIME &gt;= #{startTime}
+		AND A.DATATIME &lt;=#{endTime}
+		ORDER BY A.DATATIME ASC
+	</select>
+	
+	<select id="dataYearCount" resultType="com.zeei.cdq.vo.DataQueryVO">
+		SELECT
+		A.DATATIME
+		FROM
+		<if test="systemType==22">
+			T_ENV_MONI_AIR_DATASATA A
+		</if>
+		<if test="systemType==31">
+			T_PS_BAS_GAS_DATASATA A
+		</if>
+		<if test="systemType==32">
+			T_PS_BAS_WAT_DATASATA A
+		</if>
+		LEFT JOIN
+		V_ENV_STATIONPOLLINFO B
+		ON B.POLLUTECODE=A.POLLUTECODE
+		WHERE
+		A.MONITORTYPE=1
+		<if test="pointCodeList != null">
+			AND A.POINTCODE IN
+			<foreach index="index" item="item" collection="pointCodeList"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="polluteCodeList !=null">
+			AND A.POLLUTECODE IN
+			<foreach index="index" item="item" collection="polluteCodeList"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		AND A.DATATIME &gt;= #{startTime}
+		AND A.DATATIME &lt;= #{endTime}
+		GROUP BY A.DATATIME
+		ORDER BY A.DATATIME ASC
+
+	</select>
+	<select id="dataHistoryChartByStnGac" resultType="com.zeei.cdq.vo.DataQueryVO">
+		SELECT distinct C.DATATIME,C.POLLUTECODE,C.POLLUTENAME,C.DATAVALUE,C.POLLCONCUNIT
+		FROM (
+		SELECT
+		A.DATATIME,
+		A.POLLUTECODE,B.POLLUTENAME,
+		A.AVGVALUE AS DATAVALUE,
+		B.POLLCONCUNIT
+		FROM
+		<if test="systemType==22">
+			T_ENV_MONI_AIR_DATASATA A
+		</if>
+		<if test="systemType==31">
+			T_PS_BAS_GAS_DATASATA A
+		</if>
+		<if test="systemType==32">
+			T_PS_BAS_WAT_DATASATA A
+		</if>
+		LEFT JOIN V_ENV_STATIONPOLLINFO B
+		ON A.POLLUTECODE = B.POLLUTECODE
+		and A.POINTCODE = B.POINTCODE
+		WHERE A.DATATIME &gt;= #{startTime}
+		AND A.DATATIME &lt;= #{endTime}
+		<if test="pointCodeList != null">
+			AND A.POINTCODE IN
+			<foreach item="pointCode" index="index" collection="pointCodeList"
+				open="(" separator="," close=")">
+				#{pointCode}
+			</foreach>
+		</if>
+
+		<if test="polluteCodeList != null">
+			AND A.POLLUTECODE IN
+			<foreach item="polluteCode" index="index" collection="polluteCodeList"
+				open="(" separator="," close=")">
+				#{polluteCode}
+			</foreach>
+		</if>
+		GROUP BY A.DATATIME ,A.POLLUTECODE,B.POLLUTENAME,B.POLLCONCUNIT
+		) C
+		ORDER BY C.DATATIME
+		ASC
+
+	</select>
+</mapper>

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zeei.mcs.dao.PointDao">
+	
+	<select id="areaCodeListTwoLevelByUser" resultType="com.zeei.mcs.vo.AreaCodeVO">
+		select * from
+		(
+		SELECT CODE_REGION as REGIONCODE,REGIONNAME,PCODE,TYPECODE,TYPENAME FROM
+		T_DIC_AREACODE t where t.PCODE is null or t.PCODE = ''
+		union
+		select
+		CODE_REGION,REGIONNAME,PCODE,TYPECODE,TYPENAME FROM T_DIC_AREACODE t
+		where t.PCODE in (
+		SELECT CODE_REGION FROM T_DIC_AREACODE a where
+		a.PCODE is null or a.PCODE = '')) ta
+	</select>
+	
+	
+	<select id="roleStationPointListByCondition" parameterType="Map" resultType="com.zeei.mcs.vo.StationPointVO">
+		SELECT *
+		FROM (
+		    (SELECT 
+		      B.POINTCODE,
+		      B.POINTNAME,
+		      B.REGIONCODE,
+		      B.SYSTEMTYPE,
+		      1 AS checked 
+		    FROM
+		      T_BAS_ROLEPNTENTER A 
+		      RIGHT JOIN V_BAS_POINTSITE_INFO B 
+		        ON A.OBJID = B.POINTCODE 
+		    WHERE A.ROLEID = #{roleId}
+		    <if test="regionCodeList != null">
+						AND B.REGIONCODE IN 
+						<foreach collection="regionCodeList" item="item" separator="," open="(" close=")">
+							#{item}
+						</foreach>
+					</if>
+					<if test="systemCodeList != null">
+						AND B.SYSTEMTYPE IN 
+						<foreach collection="systemCodeList" item="item" separator="," open="(" close=")">
+							#{item}
+						</foreach>
+					</if>
+		    GROUP BY B.POINTCODE) 
+				UNION ALL
+				   (SELECT 
+				      B.POINTCODE,
+				      B.POINTNAME,
+				      B.REGIONCODE,
+				      B.SYSTEMTYPE,
+				      0 AS checked 
+				    FROM V_BAS_POINTSITE_INFO B 
+					WHERE 1=1
+					<if test="regionCodeList != null">
+						AND B.REGIONCODE IN 
+						<foreach collection="regionCodeList" item="item" separator="," open="(" close=")">
+							#{item}
+						</foreach>
+					</if>
+					<if test="systemCodeList != null">
+						AND B.SYSTEMTYPE IN 
+						<foreach collection="systemCodeList" item="item" separator="," open="(" close=")">
+							#{item}
+						</foreach>
+					</if>
+				GROUP BY B.POINTCODE)			
+		) I
+		GROUP BY I.POINTCODE
+	</select>
+	
+	<select id="userStationPointListByCondition" parameterType="Map" resultType="com.zeei.mcs.vo.StationPointVO">
+		SELECT *
+		FROM (
+		    (SELECT 
+		      B.POINTCODE,
+		      B.POINTNAME,
+		      B.REGIONCODE,
+		      B.SYSTEMTYPE,
+		      1 AS checked 
+		    FROM
+		      T_BAS_USERPNTENTER A 
+		      RIGHT JOIN V_BAS_POINTSITE_INFO B 
+		        ON A.OBJID = B.POINTCODE 
+		    WHERE A.USERID = #{userId}
+		    <if test="regionCodeList != null">
+						AND B.REGIONCODE IN 
+						<foreach collection="regionCodeList" item="item" separator="," open="(" close=")">
+							#{item}
+						</foreach>
+					</if>
+					<if test="systemCodeList != null">
+						AND B.SYSTEMTYPE IN 
+						<foreach collection="systemCodeList" item="item" separator="," open="(" close=")">
+							#{item}
+						</foreach>
+					</if>
+		    GROUP BY B.POINTCODE) 
+				UNION ALL
+				   (SELECT 
+				      B.POINTCODE,
+				      B.POINTNAME,
+				      B.REGIONCODE,
+				      B.SYSTEMTYPE,
+				      0 AS checked 
+				    FROM V_BAS_POINTSITE_INFO B 
+					WHERE 1=1
+					<if test="regionCodeList != null">
+						AND B.REGIONCODE IN 
+						<foreach collection="regionCodeList" item="item" separator="," open="(" close=")">
+							#{item}
+						</foreach>
+					</if>
+					<if test="systemCodeList != null">
+						AND B.SYSTEMTYPE IN 
+						<foreach collection="systemCodeList" item="item" separator="," open="(" close=")">
+							#{item}
+						</foreach>
+					</if>
+				GROUP BY B.POINTCODE)			
+		) I
+		GROUP BY I.POINTCODE
+	</select>
+
+</mapper>

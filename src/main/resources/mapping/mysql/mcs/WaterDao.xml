@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zeei.mcs.dao.WaterDao">
+	<resultMap id="BaseResultMap" type="com.zeei.mcs.vo.WsystemRiverVO" >
+	    <id column="CODE_WSYSTEMWATER" property="codeWsystemWater" jdbcType="VARCHAR" />
+	    <result column="WSYSTEMWATERNAME" property="wsystemWaterName" jdbcType="VARCHAR" />
+	    <result column="DATATYPE" property="dataType" jdbcType="INTEGER" />
+	    <result column="PCODE" property="pcode" jdbcType="VARCHAR" />
+	    <result column="REMARK" property="remark" jdbcType="VARCHAR" />
+  	</resultMap>
+  	
+	<select id="queryWsystemRiver" parameterType="com.zeei.mcs.vo.WsystemRiverVO" resultType="com.zeei.mcs.vo.WsystemRiverVO">
+		SELECT 
+		  CODE_WSYSTEMWATER AS CODEWSYSTEMWATER,
+		  WSYSTEMWATERNAME,
+		  DATATYPE,
+		  PCODE,
+		  REMARK
+		FROM
+		  T_DIC_WSYSTEMRIVER 
+	</select>
+	
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+		SELECT 
+		  CODE_WSYSTEMWATER AS CODEWSYSTEMWATER,
+		  WSYSTEMWATERNAME,
+		  DATATYPE,
+		  PCODE,
+		  REMARK
+		FROM
+		  T_DIC_WSYSTEMRIVER
+		 WHERE CODE_WSYSTEMWATER = #{codeWsystemWater,jdbcType=VARCHAR} 
+	</select>
+	
+	<select id="selectByPrimaryName" resultMap="BaseResultMap" parameterType="java.lang.String">
+		SELECT 
+		  CODE_WSYSTEMWATER AS CODEWSYSTEMWATER,
+		  WSYSTEMWATERNAME,
+		  DATATYPE,
+		  PCODE,
+		  REMARK
+		FROM
+		  T_DIC_WSYSTEMRIVER
+		 WHERE WSYSTEMWATERNAME = #{wsystemWaterName,jdbcType=VARCHAR} 
+	</select>
+	
+	<select id="selectByPrimaryAll" parameterType="java.util.Map" resultType="com.zeei.mcs.vo.WsystemRiverVO">
+		SELECT 
+		  CODE_WSYSTEMWATER AS CODEWSYSTEMWATER,
+		  WSYSTEMWATERNAME,
+		  DATATYPE,
+		  PCODE,
+		  REMARK
+		FROM
+		  T_DIC_WSYSTEMRIVER
+   <where>
+		<if test="wsystemWaterName != null and wsystemWaterName != ''">AND wsystemWaterName LIKE CONCAT('%',#{wsystemWaterName},'%')</if>
+	</where>
+  </select>
+	
+	<delete id="deleteByPrimaryKey">
+	    DELETE FROM T_DIC_WSYSTEMRIVER
+	    WHERE code_wsystemwater IN
+	    <foreach collection="list" separator="," item="codeWsystemWater" open="(" close=")">
+	    	#{codeWsystemWater}
+	    </foreach>
+  	</delete>
+  	
+  	<insert id="insertSelective" parameterType="com.zeei.mcs.vo.WsystemRiverVO" >
+    INSERT INTO T_DIC_WSYSTEMRIVER
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="codeWsystemWater != null" >
+        CODE_WSYSTEMWATER,
+      </if>
+      <if test="wsystemWaterName != null" >
+        WSYSTEMWATERNAME,
+      </if>
+      <if test="dataType != null" >
+        DATATYPE,
+      </if>
+      <if test="pcode != null" >
+        PCODE,
+      </if>
+      <if test="remark != null" >
+        REMARK,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="codeWsystemWater != null" >
+        #{codeWsystemWater,jdbcType=VARCHAR},
+      </if>
+      <if test="wsystemWaterName != null" >
+        #{wsystemWaterName,jdbcType=VARCHAR},
+      </if>
+      <if test="dataType != null" >
+        #{dataType,jdbcType=INTEGER},
+      </if>
+      <if test="pcode != null" >
+        #{pcode,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  
+    <update id="updateByPrimaryKeySelective" parameterType="com.zeei.mcs.vo.WsystemRiverVO" >
+    UPDATE T_DIC_WSYSTEMRIVER
+    <set >
+      <if test="wsystemWaterName != null" >
+        WSYSTEMWATERNAME = #{wsystemWaterName,jdbcType=VARCHAR},
+      </if>
+      <if test="dataType != null" >
+        DATATYPE = #{dataType,jdbcType=INTEGER},
+      </if>
+      <if test="pcode != null" >
+        PCODE = #{pcode,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        REMARK = #{remark,jdbcType=VARCHAR},
+      </if>
+    </set>
+    WHERE CODE_WSYSTEMWATER = #{codeWsystemWater,jdbcType=VARCHAR}
+  </update>
+  
+  <update id="updateByPrimaryKey" parameterType="com.zeei.mcs.vo.WsystemRiverVO" >
+    UPDATE T_DIC_WSYSTEMRIVER
+    SET WSYSTEMWATERNAME = #{wsystemWaterName,jdbcType=VARCHAR},
+      DATATYPE = #{dataType,jdbcType=INTEGER},
+      PCODE = #{pcode,jdbcType=VARCHAR}
+      REMARK = #{remark,jdbcType=VARCHAR}
+    WHERE CODE_WSYSTEMWATER = #{codeWsystemWater,jdbcType=VARCHAR}
+  </update>
+</mapper>

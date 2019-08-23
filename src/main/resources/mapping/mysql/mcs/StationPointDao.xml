@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zeei.mcs.dao.StationPointDao">
+		
+<select id="stationPointList" resultType="com.zeei.mcs.vo.StationPointVO">
+		SELECT t.* FROM
+		V_BAS_POINTSITE_INFO t
+		JOIN T_BAS_USERPNTENTER u ON u.OBJID=t.POINTCODE  AND u.TYPE=1 
+		WHERE 1=1
+		AND u.USERID=#{userid} AND t.systemtype=#{systemType} AND t.status!=-1
+		UNION
+		SELECT t.* FROM
+		V_BAS_POINTSITE_INFO t 
+		JOIN T_BAS_ROLEPNTENTER r ON r.OBJID=t.POINTCODE  AND r.TYPE=1
+		JOIN T_BAS_USERROLE u ON u.ROLEID=r.ROLEID
+		WHERE 1=1
+		AND u.USERID=#{userid} AND t.systemtype=#{systemType} AND t.status!=-1
+	</select>
+	
+	<select id="stationPointAllList" resultType="com.zeei.mcs.vo.StationPointVO">
+		SELECT t.* FROM
+		V_BAS_POINTSITE_INFO t WHERE t.systemtype=#{systemType} AND t.status!=-1
+	</select>
+	
+	<select id="getStationByPointList" parameterType="Map" resultType="com.zeei.mcs.vo.StationPointVO" >
+		SELECT t.* FROM
+		V_BAS_POINTSITE_INFO t WHERE t.systemtype=#{systemType} AND t.status!=-1
+			<if test="pointCodes != null">
+				AND t.POINTCODE IN 
+				<foreach item="pointCode" index="index" collection="pointCodes" open="(" separator="," close=")">
+					#{pointCode}
+				</foreach>
+			</if>
+	</select>
+	
+	<select id="queryPollStdPointByCondition" parameterType="java.util.Map" resultType="com.zeei.mcs.vo.StationPointVO" >
+		<if test="systemType ==22">
+			SELECT 
+			  temp.pointcode,
+			  temp.pointname,
+			  temp.checked,
+			  temp.scode
+			FROM
+			  (SELECT 
+			    v.pointcode,
+			    v.pointname,
+			    v.scode,
+			    1 AS checked 
+			  FROM
+			    V_BAS_POINTSITE_INFO v 
+			    JOIN T_ENV_MONI_AIR_STATION p 
+			      ON p.pointcode = v.pointcode 
+			  WHERE v.systemtype = #{systemType} 
+			  AND v.scode=#{scode}
+			  AND v.status !=-1
+			  <if test="areaCodeList !=null and areaCodeList.size()>0">
+		  		AND v.regioncode IN
+		  		<foreach collection="areaCodeList" open="(" separator="," index="index" item="areaCode" close=")">
+		  			#{areaCode}
+		  		</foreach>
+	  		  </if>
+			  UNION
+			  SELECT 
+			    v.pointcode,
+			    v.pointname,
+			    v.scode,
+			    0 AS checked 
+			  FROM
+			    V_BAS_POINTSITE_INFO v 
+			  WHERE v.systemtype = #{systemType}
+			  AND v.status !=-1
+			  <if test="areaCodeList !=null and areaCodeList.size()>0">
+		  		AND v.regioncode IN
+		  		<foreach collection="areaCodeList" open="(" separator="," index="index" item="areaCode" close=")">
+		  			#{areaCode}
+		  		</foreach>
+	  		  </if>
+			   ) temp 
+			GROUP BY temp.pointcode 
+		</if>
+		<if test="systemType ==31 or systemType ==32">
+			SELECT 
+			  temp.pointcode,
+			  temp.pointname,
+			  temp.checked,
+			  temp.scode 
+			FROM
+			  (SELECT 
+			    v.pointcode,
+			    v.pointname,
+			    v.scode,
+			    1 AS checked 
+			  FROM
+			    V_BAS_POINTSITE_INFO v 
+			    JOIN T_PS_BAS_POINTLIST p 
+			      ON p.pointcode = v.pointcode 
+			    JOIN T_PS_BAS_ENTERLIST e
+			    ON p.pscode=e.pscode
+			    <if test="trade !=null and trade !=''">
+				  AND e.code_trade=#{trade}
+			  	</if>
+			  WHERE v.systemtype = #{systemType}
+			  AND v.status !=-1 
+			  <if test="areaCodeList !=null and areaCodeList.size()>0">
+		  		AND v.regioncode IN
+		  		<foreach collection="areaCodeList" open="(" separator="," index="index" item="areaCode" close=")">
+		  			#{areaCode}
+		  		</foreach>
+	  		  </if>
+			  UNION
+			  SELECT 
+			    v.pointcode,
+			    v.pointname,
+			    v.scode,
+			    0 AS checked 
+			  FROM
+			    V_BAS_POINTSITE_INFO v 
+			  WHERE systemtype = #{systemType} 
+			  AND v.status !=-1
+			 <if test="areaCodeList !=null and areaCodeList.size()>0">
+		  		AND v.regioncode IN
+		  		<foreach collection="areaCodeList" open="(" separator="," index="index" item="areaCode" close=")">
+		  			#{areaCode}
+		  		</foreach>
+	  		  </if>
+			  ) temp 
+			GROUP BY temp.pointcode 
+		</if>
+	</select>
+
+	<select id="queryAlmPointByCondition" parameterType="java.util.Map" resultType="com.zeei.mcs.vo.StationPointVO" >
+		SELECT 
+		  temp.pointcode,
+		  temp.pointname,
+		  temp.checked 
+		FROM
+		  (SELECT 
+		    s.pointcode,
+		    v.pointname,
+		    1 AS checked 
+		  FROM
+		    T_BAS_ALM_STATION s 
+		    LEFT JOIN V_BAS_POINTSITE_INFO v 
+		      ON v.pointcode = s.pointcode 
+		      AND v.status !=-1
+		      <if test="areaCodeList !=null and areaCodeList.size()>0">
+		  		AND v.regioncode IN
+		  		<foreach collection="areaCodeList" open="(" separator="," index="index" item="areaCode" close=")">
+		  			#{areaCode}
+		  		</foreach>
+	  		  </if>  
+	  		 <if test="systemType !=null and systemType !=''">
+		  		 AND v.systemtype = #{systemType}
+	  		 </if> 
+	  	   WHERE s.alarmcode=#{alarmCode}  	  
+		  UNION
+		  SELECT 
+		    v.pointcode,
+		    v.pointname,
+		    0 AS checked 
+		  FROM
+		    V_BAS_POINTSITE_INFO v
+		   WHERE v.status !=-1
+		      <if test="systemType !=null and systemType !=''">
+		  		 AND v.systemtype = #{systemType}  
+	  		  </if> 
+		  	  <if test="areaCodeList !=null and areaCodeList.size()>0">
+		  		AND v.regioncode IN
+		  		<foreach collection="areaCodeList" open="(" separator="," index="index" item="areaCode" close=")">
+		  			#{areaCode}
+		  		</foreach>
+	  		  </if>
+		    ) temp 
+		GROUP BY temp.pointcode,temp.pointname 
+	</select>
+	
+	<update id="removePointPollStdByScode">
+		<if test="systemType ==22">
+			UPDATE 
+			  T_ENV_MONI_AIR_STATION 
+			SET
+			  scode = NULL 
+			WHERE scode = #{scode} 
+		</if>
+		<if test="systemType ==31 or systemType ==32">
+			UPDATE 
+			  T_PS_BAS_POINTLIST 
+			SET
+			  scode = NULL 
+			WHERE scode = #{scode} 
+		</if>
+	</update>
+	
+	<update id="updatePointPollStdByIds" parameterType="java.util.Map">
+		<if test="systemType ==22">
+			UPDATE 
+			  T_ENV_MONI_AIR_STATION 
+			SET
+			  scode =  #{scode} 
+			WHERE pointcode IN 
+			<foreach collection="pointCodes" open="(" separator="," close=")" item="pointCode">
+				#{pointCode}
+			</foreach>
+		</if>
+		<if test="systemType ==31 or systemType ==32">
+			UPDATE 
+			  T_PS_BAS_POINTLIST 
+			SET
+			  scode =  #{scode} 
+			WHERE pointcode IN
+			<foreach collection="pointCodes" open="(" separator="," close=")" item="pointCode">
+				#{pointCode}
+			</foreach>
+		</if>
+	</update>
+	
+	<select id="queryStationPointByCondition" parameterType="java.util.Map" resultType="com.zeei.mcs.vo.StationPointVO">
+			SELECT 
+			  v.pointcode,
+			  v.pointname,
+			  v.regioncode,
+			  ar.regionname,
+			   v.systemtype,
+			  gc.categoryname AS systemName,
+			  v.controllevel,
+  			  gc2.categoryname AS controllevelName 
+			FROM
+			  V_BAS_POINTSITE_INFO v 
+			  LEFT JOIN T_DIC_AREACODE ar 
+			    ON ar.code_region = v.regioncode 
+			  LEFT JOIN T_DIC_GENERALCATEGORY gc 
+			    ON gc.generalcode = CONCAT(v.systemtype,'') 
+			  LEFT JOIN T_DIC_GENERALCATEGORY gc2 
+   				ON gc2.generalcode = v.controllevel 
+   			<if test="userId !=null">
+   			 JOIN V_BAS_USER_PNTENTER up
+				ON up.objid=v.pointcode
+				AND up.userid=#{userId}	
+   			</if>  
+			WHERE v.status !=-1
+			<if test="areaCodeList !=null and areaCodeList.size()>0">
+				AND v.regioncode IN
+				<foreach collection="areaCodeList" open="(" separator="," close=")" item="areaCode">
+					#{areaCode}				
+				</foreach>
+			</if>
+			<if test="searchPointName !=null and searchPointName !=''">
+				AND v.pointname LIKE CONCAT('%',#{searchPointName},'%')
+			</if>
+			<if test="controlLevel !=null and controlLevel !=''">
+				AND v.controllevel=#{controlLevel}
+			</if>
+			<if test="systemType !=null and systemType !=''">
+				AND v.systemtype = #{systemType}
+			</if>
+			<if test="stationCode !=null and stationCode !=''">
+				AND v.stationcode = #{stationCode}
+			</if>
+			<if test="pointName !=null and pointName !=''">
+				AND v.pointname = #{pointName}
+			</if>
+			<if test="pointCode !=null and pointCode !=''">
+				AND v.pointcode = #{pointCode}
+			</if>
+			<if test="stdPointCode !=null and stdPointCode !=''">
+				AND v.stdpointcode = #{stdPointCode}
+			</if>
+			<if test="pscode !=null and pscode !=''">
+				AND v.pscode = #{pscode}
+			</if>
+			ORDER BY v.ordernum DESC,v.pointcode DESC 	
+	</select>
+	
+	<update id="deleteStationPointById" parameterType="com.zeei.mcs.vo.StationPointVO">
+		<if test="systemType ==22">
+			UPDATE 
+			  T_ENV_MONI_AIR_STATION 
+			SET
+			  status = -1 
+			WHERE pointcode=#{pointCode}
+		</if>
+		<if test="systemType ==31 or systemType ==32">
+			UPDATE 
+			  T_PS_BAS_POINTLIST 
+			SET
+			  	status = -1 
+			WHERE pointcode =#{pointCode}
+		</if>
+	</update>
+	
+</mapper>

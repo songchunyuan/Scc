@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zeei.cdq.dao.DataMinuteDao">
+	<resultMap id="BaseResultMap" type="com.zeei.cdq.vo.DataQueryVO">
+		<result column="POLLUTECODE" property="polluteCode" jdbcType="NVARCHAR" />
+		<result column="POLLUTENAME" property="polluteName" jdbcType="NVARCHAR" />
+		<result column="ENNNAME" property="enName" jdbcType="NVARCHAR" />
+		<result column="POLLUTEAMOUNTUNIT" property="polluteamountUnit"
+			jdbcType="NVARCHAR" />
+		<result column="PRECISION" property="precision" jdbcType="NUMERIC" />
+		<result column="ORDERNUM" property="orderNum" jdbcType="NUMERIC" />
+		<result column="GROUPCODE" property="groupCode" jdbcType="NUMERIC" />
+		<result column="GROUPNAME" property="groupName" jdbcType="NVARCHAR" />
+		<result column="DATAVALUE" property="dataValue" jdbcType="NVARCHAR" />
+		<result column="DATATIME" property="dataTime" jdbcType="DATE" />
+	</resultMap>
+
+	<select id="dataHistoryStatsList" resultType="com.zeei.cdq.vo.DataHistoryStatsVO">
+		SELECT 
+		  d.pollutecode,
+		  FORMAT(MAX(`datavalue`), st.numprecision) AS maximumValue,
+		  FORMAT(MIN(`datavalue`), st.numprecision) AS minimumValue,
+		  FORMAT(AVG(`datavalue`), st.numprecision) AS averageVlaue,
+		  COUNT(*) AS sumValue,
+		  SUM(CASE WHEN d.dataflag!='F' THEN 1 ELSE 0 END ) AS validValue
+		FROM
+			(${RTTable}) d
+		  JOIN T_DIC_STDPOLLCODE st 
+		    ON st.pollutecode = d.pollutecode 
+		WHERE d.datatime >= #{startTime}
+		AND <![CDATA[ d.datatime <= #{endTime}]]>
+		AND d.pointcode IN
+		<foreach item="pointCode" index="index" collection="pointCodeList"
+			open="(" separator="," close=")">
+			#{pointCode}
+		</foreach>
+		<if test="polluteCodeList != null">
+			AND d.pollutecode IN
+			<foreach item="polluteCode" index="index" collection="polluteCodeList"
+				open="(" separator="," close=")">
+				#{polluteCode}
+			</foreach>
+		</if>
+		GROUP BY pollutecode 
+		ORDER BY d.datatime ASC
+	</select>
+
+	<select id="dataMinuteList" resultType="com.zeei.cdq.vo.DataQueryVO">
+		SELECT A.POINTCODE, B.POINTNAME,
+		SUBSTR(A.DATATIME,1,19) DATATIME,
+		A.POLLUTECODE,
+		B.POLLUTENAME,
+		FORMAT(A.DATAVALUE, B.NUMPRECISION) AS DATAVALUE,
+		A.DATAFLAG,
+		C.SUNIT,FORMAT(C.SMINVALUE, B.NUMPRECISION) AS SMINVALUE,FORMAT(C.SMAXVALUE, B.NUMPRECISION) AS SMAXVALUE
+		FROM
+		(${RTTable}) A
+		INNER JOIN V_ENV_STATIONPOLLINFO B
+		ON A.POLLUTECODE = B.POLLUTECODE
+		AND A.POINTCODE=B.POINTCODE
+
+		LEFT JOIN V_BAS_POLLSTD C
+		ON C.POINTCODE = A.POINTCODE
+		AND C.POLLUTECODE=A.POLLUTECODE AND C.SYSTEMTYPE =#{systemType}
+
+		WHERE A.DATATIME &gt;= #{startTime}
+		AND A.DATATIME &lt;= #{endTime}
+		<if test="pointCodeList != null">
+			AND A.POINTCODE IN
+			<foreach item="pointCode" index="index" collection="pointCodeList"
+				open="(" separator="," close=")">
+				#{pointCode}
+			</foreach>
+		</if>
+
+		<if test="polluteCodeList != null">
+			AND A.POLLUTECODE IN
+			<foreach item="polluteCode" index="index" collection="polluteCodeList"
+				open="(" separator="," close=")">
+				#{polluteCode}
+			</foreach>
+		</if>
+		ORDER BY A.DATATIME ASC
+
+	</select>
+	<select id="dataMinuteCount" parameterType="String"
+		resultType="com.zeei.cdq.vo.DataQueryVO">
+		${value}
+	</select>
+	<select id="dataMinuteExceedList" resultType="com.zeei.gems.vo.DataExceedStandardVO">
+		SELECT t.pointname,t.DATATIME,GROUP_CONCAT(t.POLLUTENAME SEPARATOR
+		'|') as POLLUTENAME,GROUP_CONCAT(t.SUNIT SEPARATOR '|') as SUNIT,
+		GROUP_CONCAT(t.DATAVALUE SEPARATOR '|') AS DATAVALUES,t.CATEGORYNAME
+		AS DATATYPENAME FROM (
+		SELECT B.POINTNAME,
+		E.REGIONNAME,
+		F.POLLUTENAME,
+		SUBSTR(A.DATATIME,1,16) DATATIME,
+		A.DATAVALUE,
+		B.SUNIT,
+		B.SMINVALUE,
+		B.SMAXVALUE,
+		G.CATEGORYNAME
+		FROM
+		(${RTTable})
+		A
+		LEFT JOIN V_BAS_POLLSTD B
+		ON B.POINTCODE = A.POINTCODE
+		AND
+		B.POLLUTECODE=A.POLLUTECODE AND B.SYSTEMTYPE =#{systemType}
+		LEFT JOIN
+		T_DIC_AREACODE E
+		ON
+		E.CODE_REGION=B.REGIONCODE
+		LEFT JOIN
+		T_DIC_STDPOLLCODE F
+		ON
+		F.POLLUTECODE=A.POLLUTECODE
+		LEFT JOIN
+		T_DIC_GENERALCATEGORY G ON G.CATEGORYCLASS ='dataType' AND
+		G.GENERALCODE=#{dataType}
+		WHERE A.DATATIME
+		&gt;=#{startTime}
+		AND
+		A.DATATIME &lt;=#{endTime}
+		AND (
+		A.DATAVALUE &gt;= B.SMAXVALUE
+		OR
+		A.DATAVALUE &lt;= B.SMINVALUE
+		)
+		<if test="pointCodeList != null">
+			AND A.POINTCODE IN
+			<foreach index="index" item="item" collection="pointCodeList"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		ORDER BY
+		A.POINTCODE,A.DATATIME,A.POLLUTECODE ASC
+		) t
+		GROUP BY t.pointname,t.DATATIME
+	</select>
+
+	<select id="dataHistoryChartByStnGac" resultType="com.zeei.cdq.vo.DataQueryVO">
+		SELECT distinct
+		C.DATATIME,C.POLLUTECODE,C.POLLUTENAME,C.DATAVALUE,C.POLLCONCUNIT
+		FROM
+		(
+		SELECT
+		A.DATATIME,
+		A.POLLUTECODE,B.POLLUTENAME,
+		A.DATAVALUE,
+		B.POLLCONCUNIT
+		FROM
+		(${RTTable}) A
+		LEFT JOIN V_ENV_STATIONPOLLINFO B
+		ON
+		A.POLLUTECODE = B.POLLUTECODE
+		AND A.POINTCODE = B.POINTCODE AND
+		B.SYSTEMTYPE =#{systemType}
+		WHERE A.DATATIME &gt;= #{startTime}
+		AND
+		A.DATATIME &lt;= #{endTime}
+		<if test="pointCodeList != null">
+			AND A.POINTCODE IN
+			<foreach item="pointCode" index="index" collection="pointCodeList"
+				open="(" separator="," close=")">
+				#{pointCode}
+			</foreach>
+		</if>
+
+		<if test="polluteCodeList != null">
+			AND A.POLLUTECODE IN
+			<foreach item="polluteCode" index="index" collection="polluteCodeList"
+				open="(" separator="," close=")">
+				#{polluteCode}
+			</foreach>
+		</if>
+		GROUP BY A.DATATIME ,A.POLLUTECODE,B.POLLUTENAME,B.POLLCONCUNIT
+		) C
+		ORDER BY C.DATATIME
+		ASC
+
+	</select>
+<select id="dataIntegrityStatisticsList" parameterType="java.util.Map"
+		resultType="com.zeei.gems.vo.DataIntegrityStatisticsResult">
+		SELECT
+		t.originallyDataCount,(CASE WHEN t.datacount>t.originallyDataCount THEN 0 ELSE (t.originallyDataCount-t.datacount) END) AS DefectDataCount,
+		(CASE t.datacount WHEN 0 THEN 0 ELSE (CASE WHEN t.datacount>t.originallyDataCount THEN 1 ELSE t.datacount/t.originallyDataCount END) END)*100
+		AS dataIntegrityRate,
+		t.pointcode,t.pointname,t.regionname
+		FROM (SELECT
+		TRUNCATE(TIMESTAMPDIFF(MINUTE,#{startTime}, DATE_ADD(#{endTime}, INTERVAL 1 SECOND))/p.micycletime,0) AS originallyDataCount,
+		a.regionname,
+		p.micycletime,
+		p.rtcytletime AS rtCycleTime,
+		p.pointcode,
+		p.pointname,
+		(case ISNULL(n.datacount) when 0 then n.datacount else 0 end) datacount
+		FROM
+		V_BAS_POINTSITE_INFO p
+		LEFT JOIN
+		(SELECT
+		pointcode,COUNT(*) AS datacount
+		FROM
+		(SELECT k.pointcode,k.datatime
+		FROM
+		(${RTTable}) k
+		WHERE k.datatime >= #{startTime}
+		AND <![CDATA[ k.datatime <= #{endTime}]]>
+		GROUP BY k.pointcode,SUBSTR(k.datatime,1,16)) t
+		GROUP BY pointcode) n
+		ON p.pointcode = n.pointcode
+		JOIN T_DIC_AREACODE a
+		ON p.regioncode = a.code_region
+		WHERE p.systemtype = #{systemType}
+		AND p.pointcode IN
+		<foreach item="pointCode" collection="pointCodeList" open="("
+			separator="," close=")">
+			#{pointCode}
+		</foreach>
+		) t
+	</select>
+	
+</mapper>

@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zeei.mcs.dao.AreaCodeDao">
+<select id="queryAreaCodeList" parameterType="java.util.Map" resultType="com.zeei.mcs.vo.AreaCodeVO">
+		SELECT
+			T1.CODE_REGION REGIONCODE,
+			T1.REGIONNAME REGIONNAME,
+			T2.REGIONNAME PNAME,
+			T1.PCODE,
+			T1.TYPECODE,
+			T1.TYPENAME,
+			T1.ORDERNUM,
+			T1.LONGITUDE,
+			T1.LATITUDE,
+			T1.LEVEL
+		FROM
+		(SELECT
+			CODE_REGION,
+			REGIONNAME,
+			PCODE,
+			TYPECODE,
+			TYPENAME,
+			ORDERNUM,
+			LONGITUDE,
+			LATITUDE,
+			LEVEL
+		FROM
+			T_DIC_AREACODE) T1 
+			LEFT JOIN T_DIC_AREACODE T2 ON T1.PCODE=T2.CODE_REGION
+		<where>
+			<if test="regionCode != null and regionCode != ''">AND T1.code_Region=#{regionCode}</if>
+		    <if test="regionName != null and regionName != ''"> AND T1.regionName LIKE CONCAT('%',#{regionName},'%')</if>
+		</where>
+		ORDER BY ORDERNUM DESC
+	</select>
+	
+	<select id="queryAreaNameList" parameterType="java.util.Map" resultType="com.zeei.mcs.vo.AreaCodeVO">
+		SELECT
+			T1.CODE_REGION REGIONCODE,
+			T1.REGIONNAME REGIONNAME,
+			T2.REGIONNAME PNAME,
+			T1.PCODE,
+			T1.TYPECODE,
+			T1.TYPENAME,
+			T1.ORDERNUM,
+			T1.LONGITUDE,
+			T1.LATITUDE,
+			T1.LEVEL
+		FROM
+		(SELECT
+			CODE_REGION,
+			REGIONNAME,
+			PCODE,
+			TYPECODE,
+			TYPENAME,
+			ORDERNUM,
+			LONGITUDE,
+			LATITUDE,
+			LEVEL
+		FROM
+			T_DIC_AREACODE) T1 
+			LEFT JOIN T_DIC_AREACODE T2 ON T1.PCODE=T2.CODE_REGION
+		<where>
+			<if test="regionCode != null and regionCode != ''">AND T1.code_Region=#{regionCode}</if>
+		    <if test="regionName != null and regionName != ''"> AND T1.regionName=#{regionName}</if>
+		</where>
+		ORDER BY orderNum
+	</select>
+	
+	<insert id="insertAreaCode" parameterType="com.zeei.mcs.vo.AreaCodeVO">
+		INSERT INTO T_DIC_AREACODE
+		<trim prefix="(" prefixOverrides=",">			
+			<if test="regionCode !=null and regionCode != ''">,code_Region</if>
+			<if test="regionName !=null and regionName != ''">,regionName</if>
+			<if test="pCode !=null and pCode != ''">,pcode</if>
+			<if test="typeCode !=null and typeCode != ''">,typeCode</if>
+			<if test="typeName !=null and typeName != ''">,typeName</if>
+			<if test="orderNum !=null and orderNum != ''">,orderNum</if>
+			<if test="longitude !=null and longitude != ''">,longitude</if>
+			<if test="latitude !=null and latitude != ''">,latitude</if>
+			<if test="level !=null and level != ''">,level</if>
+		</trim>
+		)
+		VALUES
+		<trim prefix="(" prefixOverrides=",">
+			<if test="regionCode !=null and regionCode != ''">,#{regionCode}</if>
+			<if test="regionName !=null and regionName != ''">,#{regionName}</if>
+			<if test="pCode !=null and pCode != ''">,#{pCode}</if>
+			<if test="typeCode !=null and typeCode != ''">,#{typeCode}</if>
+			<if test="typeName !=null and typeName != ''">,#{typeName}</if>
+			<if test="orderNum !=null and orderNum != ''">,#{orderNum}</if>
+			<if test="longitude !=null and longitude != ''">,#{longitude}</if>
+			<if test="latitude !=null and latitude != ''">,#{latitude}</if>
+			<if test="level !=null and level != ''">,#{level}</if>
+		</trim>
+		)
+	</insert>
+	
+ 	<update id="updateAreaCode" parameterType="com.zeei.mcs.vo.AreaCodeVO">
+	    UPDATE T_DIC_AREACODE
+	      SET 
+	      	 	regionName = #{regionName,jdbcType = VARCHAR}
+	           <if test="regionName != null and regionName != ''">,regionName = #{regionName}</if>
+	           ,pCode = #{pCode}
+	           <if test="typeCode != null and typeCode != ''">,typeCode = #{typeCode}</if>
+	           <if test="typeName != null and typeName != ''">,typeName = #{typeName}</if>
+	           <if test="orderNum != null and orderNum != ''">,orderNum = #{orderNum}</if>
+	           <if test="longitude != null and longitude != ''">,longitude = #{longitude}</if>
+	           <if test="latitude !=null and latitude != ''">,latitude = #{latitude}</if>
+	           <if test="level != null and level != ''">,level = #{level}</if>
+	     WHERE code_Region = #{regionCode}
+	</update>
+	
+	<delete id="deleteAreaCode">
+		DELETE FROM T_DIC_AREACODE
+		WHERE code_Region IN
+		<foreach collection="list" separator="," item="id" open="(" close=")">
+			#{id} 
+		</foreach>
+	</delete>
+	
+	<select id="queryRegionInfo" parameterType="com.zeei.mcs.vo.AreaCodeVO" resultType="com.zeei.mcs.vo.AreaCodeVO">
+		 SELECT
+			CODE_REGION as REGIONCODE,
+			REGIONNAME,
+			PCODE,
+			TYPECODE,
+			TYPENAME,
+			ORDERNUM,
+			LONGITUDE,
+			LATITUDE,
+			LEVEL
+		FROM
+			T_DIC_AREACODE
+        <where>
+		     <if test="regionCode !=null">
+		     	AND code_Region=#{regionCode}
+		     </if>
+		     <if test="regionName !=null and regionName!=''">
+		     	AND regionName=#{regionName}
+		     </if>
+		     <if test="deptLeaderId !=null">
+		     	AND pcode=#{pcode}
+		     </if>
+	     </where>
+	</select>
+
+	<select id="areaCodeTwoLevelCity" resultType="com.zeei.mcs.vo.AreaCodeVO">		
+		SELECT * FROM T_DIC_AREACODE WHERE PCODE IN (
+		SELECT CODE_REGION
+		FROM T_DIC_AREACODE WHERE pcode IS NULL OR pcode = '')
+		AND CODE_REGION IN (SELECT CODE_REGION FROM T_ENV_MONI_AIR_STATION)
+		OR CODE_REGION IN ('110000000000','120000000000','310000000000','500000000000')
+	</select>
+
+	<select id="areaCodeListTwoLevelByUser" resultType="com.zeei.mcs.vo.AreaCodeVO">
+		select * from
+		(
+		SELECT CODE_REGION as REGIONCODE,REGIONNAME,(case WHEN PCODE IS NULL THEN '' ELSE PCODE END) PCODE,TYPECODE,TYPENAME,ORDERNUM FROM
+		T_DIC_AREACODE t where t.PCODE is null or t.PCODE = ''
+		union
+		select
+		CODE_REGION,REGIONNAME,PCODE,TYPECODE,TYPENAME,ORDERNUM FROM T_DIC_AREACODE t
+		where t.PCODE in (
+		SELECT CODE_REGION FROM T_DIC_AREACODE a where
+		a.PCODE is null or a.PCODE = '')) ta
+		ORDER BY ORDERNUM DESC
+	</select>
+</mapper>

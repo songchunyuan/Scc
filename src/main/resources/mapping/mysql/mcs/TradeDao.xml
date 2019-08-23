@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zeei.mcs.dao.TradeDao">
+
+	<select id="queryTrade" parameterType="com.zeei.mcs.vo.TradeCodeVO" resultType="com.zeei.mcs.vo.TradeCodeVO">
+		SELECT 
+		  code_trade AS codeTrade,
+		  tradename,
+		  pcode,
+		  instructions 
+		FROM
+		  T_DIC_TRADECODE
+	</select>
+	
+</mapper>
