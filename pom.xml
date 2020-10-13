@@ -23,7 +23,7 @@
 		<!-- fast json版本 -->
 		<fastjson.version>1.2.10</fastjson.version>
 		<!-- junit.version版本 -->
-		<junit.version>4.11</junit.version>
+		<junit.version>4.13.1</junit.version>
 		<!-- shiro.version版本 -->
 		<shiro.version>1.2.6</shiro.version>
 		<!--cxf版本 -->
