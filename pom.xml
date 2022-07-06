@@ -25,7 +25,7 @@
 		<!-- junit.version版本 -->
 		<junit.version>4.11</junit.version>
 		<!-- shiro.version版本 -->
-		<shiro.version>1.2.6</shiro.version>
+		<shiro.version>1.9.1</shiro.version>
 		<!--cxf版本 -->
 		<cxf.version>2.2.3</cxf.version>
 		<!--定时任务 -->
